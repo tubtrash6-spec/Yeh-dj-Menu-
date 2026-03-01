@@ -1195,8 +1195,6 @@
             </div>
         </div>
 
-        <!-- Order Counter - Completely REMOVED from customer view -->
-
         <!-- Category Tabs -->
         <div class="category-tabs" id="categoryTabs"></div>
 
@@ -1239,7 +1237,7 @@
             
             <div style="background: #f5f5f5; padding: 12px 18px; border-radius: 40px; margin: 10px 0;">
                 <i class="fas fa-phone" style="color: #fc8019;"></i>
-                <span id="modalPhone">+91 95408 28708</span>
+                <span id="modalPhone">+91 9540828708</span>
             </div>
             
             <input type="text" class="modal-input" id="customerName" placeholder="Enter your name *" required>
@@ -1287,6 +1285,10 @@
         // ImgBB API Key
         const IMGBB_KEY = "33a4ac4bf9160466bd7103e1b516fc23";
 
+        // ========== FIXED WHATSAPP NUMBER ==========
+        let whatsappNumber = "919540828708";  // Sirf numbers, no + or spaces
+        let whatsappDisplay = "+91 9540828708";  // Display format
+
         // ---------- BASE MENU ----------
         const BASE_ITEMS = [
             { id: 'veg-steam-4', name: 'Veg Steam Momos (4 pcs)', basePrice: 40, category: '🥟 Veg Momos' },
@@ -1316,8 +1318,6 @@
         let quantities = {};
         let itemImages = {};
         let adminActive = false;
-        let whatsappNumber = '919540828708';
-        let whatsappDisplay = '+91 95408 28708';
         
         // New States
         let outletOpen = true;
@@ -1577,8 +1577,8 @@
             if (storedWA) {
                 try {
                     const wa = JSON.parse(storedWA);
-                    whatsappNumber = wa.number || '919540828708';
-                    whatsappDisplay = wa.display || '+91 95408 28708';
+                    if (wa.number) whatsappNumber = wa.number;
+                    if (wa.display) whatsappDisplay = wa.display;
                 } catch { }
             }
 
@@ -1791,7 +1791,6 @@
                 const today = new Date().toDateString();
                 orders = orders.filter(order => new Date(order.timestamp).toDateString() !== today);
                 localStorage.setItem('dj_bites_orders', JSON.stringify(orders));
-                updateTotalOrdersDisplay();
                 showNotification('🗑️ Today\'s orders cleared!');
                 playSound('success');
                 
@@ -1978,18 +1977,13 @@
             return `${date}${month}${year}-${random}`;
         }
 
-        // Get order count
+        // Get order count for phone
         function getOrderCountForPhone(phone) {
             const today = new Date().toDateString();
             return orders.filter(order => 
                 order.phone === phone && 
                 new Date(order.timestamp).toDateString() === today
             ).length;
-        }
-
-        // Update total orders display (for admin)
-        function updateTotalOrdersDisplay() {
-            // Only used internally for admin
         }
 
         // Save order
@@ -2095,7 +2089,9 @@
             document.getElementById('customerName').value = '';
         };
 
+        // ========== FIXED ORDER SUBMISSION WITH DEBUG ==========
         window.submitCustomerInfo = function() {
+            console.log('submitCustomerInfo called'); // Debug
             const name = document.getElementById('customerName').value.trim();
             if (!name) {
                 alert('Please enter your name');
@@ -2107,8 +2103,10 @@
             placeOrder(name);
         };
 
-        // Place order
+        // Place order - FIXED WhatsApp URL with debug
         function placeOrder(customerName) {
+            console.log('placeOrder called for:', customerName); // Debug
+            
             let orderLines = [];
             let orderItems = [];
             let totalPrice = 0;
@@ -2146,8 +2144,31 @@
 
             playSound('order');
             
+            // FIXED: Try multiple WhatsApp URL formats
             const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+            
+            // Format 1: wa.me (recommended)
+            const url1 = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+            
+            // Format 2: api.whatsapp.com (alternative)
+            const url2 = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+            
+            // Format 3: web.whatsapp.com (for desktop)
+            const url3 = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
+            
+            console.log('WhatsApp Number:', whatsappNumber);
+            console.log('URL 1:', url1);
+            console.log('URL 2:', url2);
+            
+            // Try first format, if it fails in console we'll know
+            try {
+                // Use format 2 as it's more reliable
+                window.open(url2, '_blank');
+                console.log('Opening URL:', url2);
+            } catch (e) {
+                console.error('Error opening WhatsApp:', e);
+                alert('WhatsApp open karne me problem. URL copy karo: ' + url1);
+            }
             
             // Clear quantities
             menuItems.forEach(item => quantities[item.id] = 0);
@@ -2155,12 +2176,46 @@
             showNotification(`🎉 Order #${orderId} placed!`);
         }
 
+        // Also add direct test function
+        window.testWhatsApp = function() {
+            const testUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=Test%20message%20from%20DJ%20Bites`;
+            console.log('Test URL:', testUrl);
+            window.open(testUrl, '_blank');
+        };
+
         // DOM elements
         const menuContainer = document.getElementById('menuContainer');
         const adminArea = document.getElementById('adminArea');
         const adminSettingsPanel = document.getElementById('adminSettingsPanel');
         const orderBtn = document.getElementById('orderBtn');
         const categoryTabs = document.getElementById('categoryTabs');
+
+        // Add click handler directly to button
+        if (orderBtn) {
+            orderBtn.addEventListener('click', function(e) {
+                console.log('Order button clicked directly'); // Debug
+                e.preventDefault();
+                
+                if (!outletOpen) {
+                    alert('❌ Outlet is currently closed. Please visit during opening hours.');
+                    playSound('error');
+                    return;
+                }
+                
+                let hasItems = false;
+                menuItems.forEach(item => {
+                    if (!outOfStockItems.includes(item.id) && quantities[item.id] > 0) hasItems = true;
+                });
+                
+                if (!hasItems) {
+                    alert('Please add items to your order 🛒');
+                    playSound('error');
+                    return;
+                }
+                
+                openCustomerModal();
+            });
+        }
 
         // Set initial UI
         function updateOutletUI() {
@@ -2293,19 +2348,21 @@
                         <div style="margin: 15px 0;">
                             <label style="font-weight: 600;"><i class="fab fa-whatsapp"></i> WhatsApp Number:</label>
                             <input type="text" class="admin-input" id="waNumberInput" value="${whatsappNumber}">
+                            <small style="color: #666; display: block; margin-top: 5px;">Format: 919540828708 (no + or spaces)</small>
                         </div>
                         <div style="margin: 15px 0;">
                             <label style="font-weight: 600;"><i class="fas fa-globe"></i> Display Format:</label>
                             <input type="text" class="admin-input" id="waDisplayInput" value="${whatsappDisplay}">
                         </div>
                         <button class="save-btn" id="adminSaveBtn"><i class="fas fa-save"></i> Save Changes</button>
+                        <button class="save-btn" onclick="testWhatsApp()" style="margin-top: 10px; background: #25D366;"><i class="fab fa-whatsapp"></i> Test WhatsApp</button>
                     </div>
                 `;
 
                 document.getElementById('adminSaveBtn')?.addEventListener('click', function() {
                     const newNumber = document.getElementById('waNumberInput')?.value.trim();
                     const newDisplay = document.getElementById('waDisplayInput')?.value.trim();
-                    if (newNumber) whatsappNumber = newNumber;
+                    if (newNumber) whatsappNumber = newNumber.replace(/[^0-9]/g, ''); // Remove non-digits
                     if (newDisplay) whatsappDisplay = newDisplay;
                     saveAllSettings();
                 });
