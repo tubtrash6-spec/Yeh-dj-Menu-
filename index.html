@@ -236,43 +236,106 @@
             50% { opacity: 0.5; }
         }
 
-        .clear-today-btn {
+        /* Order History Button - Now ONLY in Admin Panel */
+        .admin-order-section {
+            background: linear-gradient(145deg, #f0f0f0, #e5e5e5);
+            border-radius: 30px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 2px solid #fc8019;
+        }
+
+        .admin-order-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .admin-order-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fc8019;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-order-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .admin-stat-box {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 40px;
+            text-align: center;
+        }
+
+        .admin-stat-number {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fc8019;
+            line-height: 1;
+        }
+
+        .admin-stat-label {
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        .admin-clear-btn {
             background: #ff4444;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 0.8rem;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
             transition: all 0.3s;
+            margin-top: 10px;
         }
 
-        .clear-today-btn:hover {
+        .admin-clear-btn:hover {
             background: #ff0000;
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 68, 68, 0.3);
         }
 
-        .order-counter-badge {
-            background: linear-gradient(145deg, #fc8019, #ff5722);
+        .admin-view-orders-btn {
+            background: #fc8019;
             color: white;
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 0.85rem;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
             font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            margin-bottom: 15px;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 10px;
         }
 
-        .order-counter-badge:hover {
+        .admin-view-orders-btn:hover {
+            background: #ff5722;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(252, 128, 25, 0.5);
+            box-shadow: 0 8px 20px rgba(252, 128, 25, 0.4);
+        }
+
+        /* Order counter - HIDDEN from customers */
+        .order-counter-badge {
+            display: none !important;
         }
 
         .admin-area {
@@ -641,12 +704,19 @@
             flex-shrink: 0;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .item-image-block:hover {
+            transform: scale(1.05);
         }
 
         .item-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            pointer-events: none;
         }
 
         .image-placeholder {
@@ -659,10 +729,88 @@
             justify-content: center;
             color: #999;
             font-size: 1.5rem;
+            pointer-events: none;
         }
 
         .image-placeholder span {
             font-size: 0.6rem;
+        }
+
+        /* Zoom Modal */
+        .zoom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: zoomFadeIn 0.3s;
+        }
+
+        @keyframes zoomFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .zoom-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: zoomIn 0.3s;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .zoom-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            border: 3px solid white;
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            background: #fc8019;
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .zoom-close:hover {
+            transform: rotate(90deg);
+            background: #ff4444;
+        }
+
+        .zoom-item-name {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .item-info {
@@ -987,17 +1135,19 @@
             to { transform: translate(-50%, 0); }
         }
 
-        /* Image preview styles */
-        .image-preview-tag {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            background: rgba(0,0,0,0.7);
-            color: #0f0;
-            font-size: 0.6rem;
-            padding: 2px 5px;
-            border-radius: 10px;
-            z-index: 5;
+        /* Loading indicator */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -1037,22 +1187,15 @@
             <div class="admin-area" id="adminArea"></div>
         </div>
 
-        <!-- Outlet Status Bar -->
+        <!-- Outlet Status Bar (Always Visible) -->
         <div class="outlet-status" id="outletStatusBar">
             <div class="status-badge">
                 <span class="status-dot open" id="statusDot"></span>
                 <span id="statusText">Outlet Open</span>
             </div>
-            <button class="clear-today-btn" id="clearTodayBtn" onclick="clearTodayOrders()">
-                <i class="fas fa-trash"></i> Clear
-            </button>
         </div>
 
-        <!-- Order Counter -->
-        <div class="order-counter-badge" id="orderCounterBtn" onclick="showOrderHistory()">
-            <i class="fas fa-history"></i>
-            <span id="totalOrdersCount">0</span> Today
-        </div>
+        <!-- Order Counter - Completely REMOVED from customer view -->
 
         <!-- Category Tabs -->
         <div class="category-tabs" id="categoryTabs"></div>
@@ -1121,966 +1264,160 @@
         </div>
     </div>
 
+    <!-- Zoom Modal -->
+    <div id="zoomModal" class="zoom-modal" style="display: none;" onclick="closeZoomModal()">
+        <div class="zoom-content" onclick="event.stopPropagation()">
+            <img id="zoomImage" class="zoom-image" src="" alt="Zoomed food item">
+            <div id="zoomItemName" class="zoom-item-name"></div>
+            <button class="zoom-close" onclick="closeZoomModal()"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <!-- Upload Progress Indicator -->
     <div id="uploadProgress" class="upload-progress" style="display: none;">
-        <i class="fas fa-spinner fa-pulse"></i> Uploading to ImgBB...
+        <i class="fas fa-spinner fa-pulse"></i> Uploading to cloud...
     </div>
 
     <script>
-        (function() {
-            // ---------- BASE MENU ----------
-            const BASE_ITEMS = [
-                { id: 'veg-steam-4', name: 'Veg Steam Momos (4 pcs)', basePrice: 40, category: '🥟 Veg Momos' },
-                { id: 'veg-steam-8', name: 'Veg Steam Momos (8 pcs)', basePrice: 80, category: '🥟 Veg Momos' },
-                { id: 'veg-fried-4', name: 'Veg Fried Momos (4 pcs)', basePrice: 50, category: '🥟 Veg Momos' },
-                { id: 'veg-fried-8', name: 'Veg Fried Momos (8 pcs)', basePrice: 90, category: '🥟 Veg Momos' },
-                { id: 'veg-kurkure-4', name: 'Veg Kurkure Momos (4 pcs)', basePrice: 65, category: '🥟 Veg Momos' },
-                { id: 'veg-kurkure-8', name: 'Veg Kurkure Momos (8 pcs)', basePrice: 125, category: '🥟 Veg Momos' },
-                { id: 'veg-gravy-6', name: 'Veg Gravy Momos (6 pcs)', basePrice: 129, category: '🥟 Veg Momos' },
-                { id: 'paneer-steam-4', name: 'Paneer Steam Momos (4 pcs)', basePrice: 50, category: '🧀 Paneer Momos' },
-                { id: 'paneer-steam-8', name: 'Paneer Steam Momos (8 pcs)', basePrice: 100, category: '🧀 Paneer Momos' },
-                { id: 'paneer-fried-4', name: 'Paneer Fried Momos (4 pcs)', basePrice: 60, category: '🧀 Paneer Momos' },
-                { id: 'paneer-fried-8', name: 'Paneer Fried Momos (8 pcs)', basePrice: 110, category: '🧀 Paneer Momos' },
-                { id: 'paneer-kurkure-4', name: 'Paneer Kurkure Momos (4 pcs)', basePrice: 85, category: '🧀 Paneer Momos' },
-                { id: 'paneer-kurkure-8', name: 'Paneer Kurkure Momos (8 pcs)', basePrice: 155, category: '🧀 Paneer Momos' },
-                { id: 'paneer-gravy-6', name: 'Paneer Gravy Momos (6 pcs)', basePrice: 139, category: '🧀 Paneer Momos' },
-                { id: 'burger-aloo', name: 'DJ Aloo Tikki Burger', basePrice: 49, category: '🍔 Burgers' },
-                { id: 'burger-veggie', name: 'DJ Veggie Burger', basePrice: 59, category: '🍔 Burgers' },
-                { id: 'cheese-addon', name: 'Cheese Slice Add-on', basePrice: 10, category: '🍔 Burgers' },
-                { id: 'spring-potato', name: 'Special Tandoori Spring Potato', basePrice: 39, category: '🥔 Spring Potato' },
-                { id: 'fries-half', name: 'French Fries (Half)', basePrice: 20, category: '🍟 French Fries' },
-                { id: 'fries-full', name: 'French Fries (Full)', basePrice: 30, category: '🍟 French Fries' }
-            ];
+        // ========== CONFIGURATION - YOUR JSONBIN.IO DETAILS ==========
+        const JSONBIN_API_KEY = "$2a$10$FZ4fy.fN71Cx6tT/zCswOOJdebJq50OaG14QuRkquiOy9r08I/1Oi";
+        const JSONBIN_BIN_ID = "69a41221ae596e708f54bd64";
+        const USE_CLOUD = true; // Ab cloud enable hai!
 
-            // ---------- STATE ----------
-            let menuItems = [];
-            let quantities = {};
-            let itemImages = {};
-            let adminActive = false;
-            let whatsappNumber = '919540828708';
-            let whatsappDisplay = '+91 95408 28708';
-            
-            // New States
-            let outletOpen = true;
-            let outOfStockItems = JSON.parse(localStorage.getItem('dj_bites_out_of_stock')) || [];
-            
-            // Order tracking
-            let orders = JSON.parse(localStorage.getItem('dj_bites_orders')) || [];
+        // ImgBB API Key
+        const IMGBB_KEY = "33a4ac4bf9160466bd7103e1b516fc23";
 
-            // Speech Synthesis for Voice Announcement
-            function speakItemName(itemName) {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    
-                    const utterance = new SpeechSynthesisUtterance(itemName);
-                    utterance.lang = 'hi-IN';
-                    utterance.rate = 0.9;
-                    utterance.pitch = 1.2;
-                    
-                    const voices = window.speechSynthesis.getVoices();
-                    const femaleVoice = voices.find(voice => voice.name.includes('Female') || voice.name.includes('Google हिन्दी'));
-                    if (femaleVoice) {
-                        utterance.voice = femaleVoice;
-                    }
-                    
-                    window.speechSynthesis.speak(utterance);
-                }
-            }
+        // ---------- BASE MENU ----------
+        const BASE_ITEMS = [
+            { id: 'veg-steam-4', name: 'Veg Steam Momos (4 pcs)', basePrice: 40, category: '🥟 Veg Momos' },
+            { id: 'veg-steam-8', name: 'Veg Steam Momos (8 pcs)', basePrice: 80, category: '🥟 Veg Momos' },
+            { id: 'veg-fried-4', name: 'Veg Fried Momos (4 pcs)', basePrice: 50, category: '🥟 Veg Momos' },
+            { id: 'veg-fried-8', name: 'Veg Fried Momos (8 pcs)', basePrice: 90, category: '🥟 Veg Momos' },
+            { id: 'veg-kurkure-4', name: 'Veg Kurkure Momos (4 pcs)', basePrice: 65, category: '🥟 Veg Momos' },
+            { id: 'veg-kurkure-8', name: 'Veg Kurkure Momos (8 pcs)', basePrice: 125, category: '🥟 Veg Momos' },
+            { id: 'veg-gravy-6', name: 'Veg Gravy Momos (6 pcs)', basePrice: 129, category: '🥟 Veg Momos' },
+            { id: 'paneer-steam-4', name: 'Paneer Steam Momos (4 pcs)', basePrice: 50, category: '🧀 Paneer Momos' },
+            { id: 'paneer-steam-8', name: 'Paneer Steam Momos (8 pcs)', basePrice: 100, category: '🧀 Paneer Momos' },
+            { id: 'paneer-fried-4', name: 'Paneer Fried Momos (4 pcs)', basePrice: 60, category: '🧀 Paneer Momos' },
+            { id: 'paneer-fried-8', name: 'Paneer Fried Momos (8 pcs)', basePrice: 110, category: '🧀 Paneer Momos' },
+            { id: 'paneer-kurkure-4', name: 'Paneer Kurkure Momos (4 pcs)', basePrice: 85, category: '🧀 Paneer Momos' },
+            { id: 'paneer-kurkure-8', name: 'Paneer Kurkure Momos (8 pcs)', basePrice: 155, category: '🧀 Paneer Momos' },
+            { id: 'paneer-gravy-6', name: 'Paneer Gravy Momos (6 pcs)', basePrice: 139, category: '🧀 Paneer Momos' },
+            { id: 'burger-aloo', name: 'DJ Aloo Tikki Burger', basePrice: 49, category: '🍔 Burgers' },
+            { id: 'burger-veggie', name: 'DJ Veggie Burger', basePrice: 59, category: '🍔 Burgers' },
+            { id: 'cheese-addon', name: 'Cheese Slice Add-on', basePrice: 10, category: '🍔 Burgers' },
+            { id: 'spring-potato', name: 'Special Tandoori Spring Potato', basePrice: 39, category: '🥔 Spring Potato' },
+            { id: 'fries-half', name: 'French Fries (Half)', basePrice: 20, category: '🍟 French Fries' },
+            { id: 'fries-full', name: 'French Fries (Full)', basePrice: 30, category: '🍟 French Fries' }
+        ];
 
-            // Audio System
-            let audioCtx = null;
-            let masterGain = null;
-            let lastSoundTime = 0;
-            const SOUND_COOLDOWN = 100;
+        // ---------- STATE ----------
+        let menuItems = [];
+        let quantities = {};
+        let itemImages = {};
+        let adminActive = false;
+        let whatsappNumber = '919540828708';
+        let whatsappDisplay = '+91 95408 28708';
+        
+        // New States
+        let outletOpen = true;
+        let outOfStockItems = JSON.parse(localStorage.getItem('dj_bites_out_of_stock')) || [];
+        
+        // Order tracking
+        let orders = JSON.parse(localStorage.getItem('dj_bites_orders')) || [];
 
-            function initAudio() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    masterGain = audioCtx.createGain();
-                    masterGain.connect(audioCtx.destination);
-                    masterGain.gain.value = 0.25;
-                }
-                return audioCtx;
-            }
-
-            function playSound(type) {
-                try {
-                    const now = Date.now();
-                    if (now - lastSoundTime < SOUND_COOLDOWN) return;
-                    lastSoundTime = now;
-
-                    const ctx = initAudio();
-                    if (ctx.state === 'suspended') {
-                        ctx.resume().then(() => playSound(type));
-                        return;
-                    }
-
-                    const currentTime = ctx.currentTime;
-                    
-                    if (type === 'click') {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(masterGain);
-                        
-                        osc.frequency.value = 620;
-                        gain.gain.setValueAtTime(0.12, currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.08);
-                        
-                        osc.start(currentTime);
-                        osc.stop(currentTime + 0.08);
-                    }
-                    else if (type === 'add') {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(masterGain);
-                        
-                        osc.frequency.value = 740;
-                        gain.gain.setValueAtTime(0.15, currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1);
-                        
-                        osc.start(currentTime);
-                        osc.stop(currentTime + 0.1);
-                    }
-                    else if (type === 'remove') {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(masterGain);
-                        
-                        osc.frequency.value = 440;
-                        gain.gain.setValueAtTime(0.12, currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.12);
-                        
-                        osc.start(currentTime);
-                        osc.stop(currentTime + 0.12);
-                    }
-                    else if (type === 'order') {
-                        const notes = [523, 659, 783, 880];
-                        notes.forEach((freq, i) => {
-                            setTimeout(() => {
-                                const osc = ctx.createOscillator();
-                                const gain = ctx.createGain();
-                                osc.connect(gain);
-                                gain.connect(masterGain);
-                                
-                                osc.frequency.value = freq;
-                                gain.gain.setValueAtTime(0.2, ctx.currentTime);
-                                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-                                
-                                osc.start();
-                                osc.stop(ctx.currentTime + 0.15);
-                            }, i * 120);
-                        }, this);
-                    }
-                    else if (type === 'success') {
-                        const osc1 = ctx.createOscillator();
-                        const osc2 = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        
-                        osc1.connect(gain);
-                        osc2.connect(gain);
-                        gain.connect(masterGain);
-                        
-                        osc1.frequency.value = 659;
-                        osc2.frequency.value = 1318;
-                        
-                        gain.gain.setValueAtTime(0.15, currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.25);
-                        
-                        osc1.start(currentTime);
-                        osc2.start(currentTime);
-                        osc1.stop(currentTime + 0.25);
-                        osc2.stop(currentTime + 0.25);
-                    }
-                    else if (type === 'error') {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(masterGain);
-                        
-                        osc.frequency.value = 220;
-                        gain.gain.setValueAtTime(0.15, currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.2);
-                        
-                        osc.start(currentTime);
-                        osc.stop(currentTime + 0.2);
-                    }
-                    else if (type === 'toggle') {
-                        const osc = ctx.createOscillator();
-                        const gain = ctx.createGain();
-                        osc.connect(gain);
-                        gain.connect(masterGain);
-                        
-                        osc.frequency.value = 880;
-                        gain.gain.setValueAtTime(0.1, currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.05);
-                        
-                        osc.start(currentTime);
-                        osc.stop(currentTime + 0.05);
-                    }
-                } catch (e) { /* Silent fallback */ }
-            }
-
-            // Show/hide upload progress
-            function showUploadProgress(show) {
-                const progress = document.getElementById('uploadProgress');
-                if (progress) {
-                    progress.style.display = show ? 'flex' : 'none';
-                }
-            }
-
-            // Load data
-            function loadStored() {
-                const storedPrices = localStorage.getItem('dj_bites_prices');
-                if (storedPrices) {
-                    try {
-                        const priceMap = JSON.parse(storedPrices);
-                        menuItems = BASE_ITEMS.map(item => ({
-                            ...item,
-                            price: priceMap[item.id] !== undefined ? priceMap[item.id] : item.basePrice
-                        }));
-                    } catch { fallback(); }
-                } else { fallback(); }
+        // ========== CLOUD FUNCTIONS ==========
+        
+        // Load images from JSONBin.io
+        async function loadImagesFromCloud() {
+            try {
+                showNotification('📥 Loading images from cloud...');
                 
-                function fallback() {
-                    menuItems = BASE_ITEMS.map(item => ({ ...item, price: item.basePrice }));
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.record && data.record.images) {
+                    itemImages = data.record.images;
+                    localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
+                    console.log('✅ Loaded images from cloud:', Object.keys(itemImages).length);
+                    
+                    // Update menu if already rendered
+                    if (typeof renderMenu === 'function') {
+                        renderMenu();
+                    }
+                    
+                    showNotification('✅ Images loaded from cloud!');
                 }
-
-                // Load custom items
-                const storedItems = localStorage.getItem('dj_bites_custom_items');
-                if (storedItems) {
-                    try {
-                        const customItems = JSON.parse(storedItems);
-                        customItems.forEach(customItem => {
-                            if (!menuItems.find(item => item.id === customItem.id)) {
-                                menuItems.push(customItem);
-                            }
-                        });
-                    } catch { }
-                }
-
-                // Load images
+            } catch (error) {
+                console.error('Error loading from cloud:', error);
+                // Fallback to localStorage
                 const storedImages = localStorage.getItem('dj_bites_images');
                 if (storedImages) {
-                    try { 
+                    try {
                         itemImages = JSON.parse(storedImages) || {};
                     } catch { 
                         itemImages = {}; 
                     }
-                } else { 
-                    itemImages = {}; 
                 }
-
-                const storedWA = localStorage.getItem('dj_bites_whatsapp');
-                if (storedWA) {
-                    try {
-                        const wa = JSON.parse(storedWA);
-                        whatsappNumber = wa.number || '919540828708';
-                        whatsappDisplay = wa.display || '+91 95408 28708';
-                    } catch { }
-                }
-
-                const storedOutlet = localStorage.getItem('dj_bites_outlet');
-                if (storedOutlet) {
-                    outletOpen = storedOutlet === 'true';
-                }
-
-                // Load custom names
-                const storedNames = localStorage.getItem('dj_bites_names');
-                if (storedNames) {
-                    try {
-                        const nameMap = JSON.parse(storedNames);
-                        menuItems = menuItems.map(item => ({
-                            ...item,
-                            name: nameMap[item.id] || item.name
-                        }));
-                    } catch { }
-                }
-
-                menuItems.forEach(item => quantities[item.id] = 0);
             }
-            loadStored();
+        }
 
-            // Save all settings
-            function saveAllSettings() {
-                const priceMap = {};
-                const nameMap = {};
-                menuItems.forEach(item => {
-                    priceMap[item.id] = item.price;
-                    nameMap[item.id] = item.name;
-                });
-                localStorage.setItem('dj_bites_prices', JSON.stringify(priceMap));
-                localStorage.setItem('dj_bites_names', JSON.stringify(nameMap));
-                localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
-                localStorage.setItem('dj_bites_whatsapp', JSON.stringify({ number: whatsappNumber, display: whatsappDisplay }));
-                localStorage.setItem('dj_bites_out_of_stock', JSON.stringify(outOfStockItems));
-                localStorage.setItem('dj_bites_outlet', outletOpen.toString());
-                
-                // Save custom items separately
-                const customItems = menuItems.filter(item => 
-                    !BASE_ITEMS.find(baseItem => baseItem.id === item.id)
-                );
-                localStorage.setItem('dj_bites_custom_items', JSON.stringify(customItems));
-                
-                showNotification('✅ Settings saved!');
-                playSound('success');
-            }
-
-            // Show notification
-            function showNotification(msg) {
-                const notifDiv = document.getElementById('notificationArea');
-                notifDiv.innerHTML = `<div class="notification">${msg}</div>`;
-                setTimeout(() => { notifDiv.innerHTML = ''; }, 2500);
-            }
-
-            // Clear today's orders
-            window.clearTodayOrders = function() {
-                const pwd = prompt('Enter password to clear today\'s orders:');
-                if (pwd === 'dj@123') {
-                    const today = new Date().toDateString();
-                    orders = orders.filter(order => new Date(order.timestamp).toDateString() !== today);
-                    localStorage.setItem('dj_bites_orders', JSON.stringify(orders));
-                    updateTotalOrdersDisplay();
-                    showNotification('🗑️ Today\'s orders cleared!');
-                    playSound('success');
-                } else {
-                    alert('Incorrect password');
-                    playSound('error');
-                }
-            };
-
-            // Toggle outlet status
-            window.toggleOutlet = function() {
-                outletOpen = !outletOpen;
-                
-                const statusDot = document.getElementById('statusDot');
-                const statusText = document.getElementById('statusText');
-                const container = document.getElementById('djBitesApp');
-                const adminToggle = document.getElementById('adminOutletToggle');
-                const adminLabel = document.getElementById('adminToggleLabel');
-                
-                if (outletOpen) {
-                    statusDot.className = 'status-dot open';
-                    statusText.textContent = 'Outlet Open';
-                    container.classList.remove('outlet-closed');
-                    if (adminToggle) {
-                        adminToggle.classList.add('active');
-                        adminLabel.textContent = 'Open';
-                    }
-                } else {
-                    statusDot.className = 'status-dot closed';
-                    statusText.textContent = 'Outlet Closed';
-                    container.classList.add('outlet-closed');
-                    if (adminToggle) {
-                        adminToggle.classList.remove('active');
-                        adminLabel.textContent = 'Closed';
-                    }
-                }
-                
-                document.getElementById('orderBtn').disabled = !outletOpen;
-                localStorage.setItem('dj_bites_outlet', outletOpen.toString());
-                playSound('toggle');
-                showNotification(outletOpen ? '🟢 Outlet is now OPEN' : '🔴 Outlet is now CLOSED');
-            };
-
-            // Add new item
-            window.addNewItem = function() {
-                const name = document.getElementById('newItemName').value.trim();
-                const price = parseInt(document.getElementById('newItemPrice').value);
-                const category = document.getElementById('newItemCategory').value.trim();
-                
-                if (!name || !price || !category) {
-                    alert('Please fill all fields');
-                    playSound('error');
-                    return;
-                }
-                
-                const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-                
-                const newItem = {
-                    id: id,
-                    name: name,
-                    basePrice: price,
-                    price: price,
-                    category: category
-                };
-                
-                menuItems.push(newItem);
-                quantities[id] = 0;
-                
-                document.getElementById('newItemName').value = '';
-                document.getElementById('newItemPrice').value = '';
-                document.getElementById('newItemCategory').value = '';
-                
-                saveAllSettings();
-                renderMenu();
-                renderCategoryTabs();
-                
-                showNotification('✅ New item added!');
-                playSound('success');
-            };
-
-            // Toggle item stock
-            window.toggleStock = function(itemId) {
-                if (outOfStockItems.includes(itemId)) {
-                    outOfStockItems = outOfStockItems.filter(id => id !== itemId);
-                } else {
-                    outOfStockItems.push(itemId);
-                }
-                renderMenu();
-                playSound('toggle');
-            };
-
-            // Update item name
-            window.updateItemName = function(itemId, newName) {
-                const item = menuItems.find(i => i.id === itemId);
-                if (item) {
-                    item.name = newName;
-                    playSound('click');
-                }
-            };
-
-            // Generate order ID
-            function generateOrderId() {
-                const now = new Date();
-                const date = now.getDate().toString().padStart(2, '0');
-                const month = (now.getMonth() + 1).toString().padStart(2, '0');
-                const year = now.getFullYear().toString().slice(-2);
-                const random = Math.floor(1000 + Math.random() * 9000);
-                return `${date}${month}${year}-${random}`;
-            }
-
-            // Get order count
-            function getOrderCountForPhone(phone) {
-                const today = new Date().toDateString();
-                return orders.filter(order => 
-                    order.phone === phone && 
-                    new Date(order.timestamp).toDateString() === today
-                ).length;
-            }
-
-            // Update total orders display
-            function updateTotalOrdersDisplay() {
-                const today = new Date().toDateString();
-                const todayOrders = orders.filter(order => new Date(order.timestamp).toDateString() === today).length;
-                document.getElementById('totalOrdersCount').textContent = todayOrders;
-            }
-
-            // Save order
-            function saveOrder(customerName, phone, items, total) {
-                const orderId = generateOrderId();
-                const order = {
-                    id: orderId,
-                    name: customerName,
-                    phone: phone,
-                    items: items,
-                    total: total,
-                    timestamp: new Date().toISOString()
-                };
-                
-                orders.push(order);
-                localStorage.setItem('dj_bites_orders', JSON.stringify(orders));
-                updateTotalOrdersDisplay();
-                return orderId;
-            }
-
-            // Get order preview
-            function getOrderPreviewHTML() {
-                let html = '';
-                let total = 0;
-                let hasItems = false;
-                
-                menuItems.forEach(item => {
-                    if (outOfStockItems.includes(item.id)) return;
-                    const qty = quantities[item.id];
-                    if (qty > 0) {
-                        hasItems = true;
-                        const itemTotal = qty * item.price;
-                        total += itemTotal;
-                        html += `
-                            <div class="preview-item">
-                                <span>${item.name} x ${qty}</span>
-                                <span>₹${itemTotal}</span>
-                            </div>
-                        `;
+        // Save images to JSONBin.io
+        async function saveImagesToCloud() {
+            if (!USE_CLOUD) return;
+            
+            try {
+                // First get existing data
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: {
+                        'X-Master-Key': JSONBIN_API_KEY
                     }
                 });
                 
-                if (!hasItems) {
-                    html = '<div style="text-align: center; color: #999; padding: 20px;">No items selected</div>';
-                } else {
-                    html += `<div class="preview-total">Total: ₹${total}</div>`;
-                }
+                const data = await response.json();
+                let existingData = data.record || {};
                 
-                return html;
-            }
-
-            // Show order history
-            window.showOrderHistory = function() {
-                const today = new Date().toDateString();
-                const todayOrders = orders.filter(order => new Date(order.timestamp).toDateString() === today);
+                // Update images
+                existingData.images = itemImages;
                 
-                let historyHtml = '';
-                if (todayOrders.length === 0) {
-                    historyHtml = '<div style="text-align: center; padding: 20px; color: #999;">No orders today</div>';
-                } else {
-                    todayOrders.reverse().forEach(order => {
-                        const time = new Date(order.timestamp).toLocaleTimeString();
-                        historyHtml += `
-                            <div class="preview-item" style="flex-direction: column; align-items: flex-start; gap: 5px;">
-                                <div style="display: flex; justify-content: space-between; width: 100%;">
-                                    <span style="font-weight: 700; color: #fc8019;">#${order.id}</span>
-                                    <span style="font-weight: 700;">₹${order.total}</span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem;">
-                                    <span>${order.name}</span>
-                                    <span style="color: #999;">${time}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                document.getElementById('orderHistoryList').innerHTML = historyHtml;
-                document.getElementById('historyModal').style.display = 'flex';
-                playSound('click');
-            };
-
-            window.closeHistoryModal = function() {
-                document.getElementById('historyModal').style.display = 'none';
-            };
-
-            // Modal functions
-            window.openCustomerModal = function() {
-                if (!outletOpen) {
-                    alert('❌ Outlet is currently closed. Please visit during opening hours.');
-                    playSound('error');
-                    return;
-                }
-                
-                const preview = getOrderPreviewHTML();
-                document.getElementById('orderPreview').innerHTML = preview;
-                document.getElementById('modalPhone').textContent = whatsappDisplay;
-                document.getElementById('customerModal').style.display = 'flex';
-                playSound('click');
-            };
-
-            window.closeModal = function() {
-                document.getElementById('customerModal').style.display = 'none';
-                document.getElementById('customerName').value = '';
-            };
-
-            window.submitCustomerInfo = function() {
-                const name = document.getElementById('customerName').value.trim();
-                if (!name) {
-                    alert('Please enter your name');
-                    playSound('error');
-                    return;
-                }
-                
-                closeModal();
-                placeOrder(name);
-            };
-
-            // Place order
-            function placeOrder(customerName) {
-                let orderLines = [];
-                let orderItems = [];
-                let totalPrice = 0;
-                
-                menuItems.forEach(item => {
-                    if (outOfStockItems.includes(item.id)) return;
-                    const qty = quantities[item.id];
-                    if (qty > 0) {
-                        const itemTotal = qty * item.price;
-                        totalPrice += itemTotal;
-                        orderLines.push(`• ${item.name} × ${qty} = ₹${itemTotal}`);
-                        orderItems.push({ name: item.name, qty: qty, price: item.price, total: itemTotal });
-                    }
+                // Save back to cloud
+                const putResponse = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify(existingData)
                 });
                 
-                if (orderLines.length === 0) {
-                    alert('Please add items to your order 🛒');
-                    playSound('error');
-                    return;
+                if (putResponse.ok) {
+                    console.log('✅ Images saved to cloud');
                 }
-                
-                const orderId = saveOrder(customerName, whatsappNumber, orderItems, totalPrice);
-                const orderCount = getOrderCountForPhone(whatsappNumber);
-                
-                let message = `🍔 *DJ BITES - PURE VEG* 🍔\n\n`;
-                message += `👤 *Customer:* ${customerName}\n`;
-                message += `📱 *Phone:* ${whatsappDisplay}\n`;
-                message += `🆔 *Order ID:* #${orderId}\n`;
-                message += `📊 *Order #${orderCount} today*\n\n`;
-                message += `*YOUR ORDER:*\n`;
-                message += orderLines.join('\n');
-                message += `\n\n*TOTAL: ₹${totalPrice}*\n\n`;
-                message += `🙏 Thank you for ordering!\n`;
-                message += `⭐ Visit again - DJ Bites`;
-
-                playSound('order');
-                
-                const encodedMessage = encodeURIComponent(message);
-                window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
-                
-                // Clear quantities
-                menuItems.forEach(item => quantities[item.id] = 0);
-                renderMenu();
-                showNotification(`🎉 Order #${orderId} placed!`);
+            } catch (error) {
+                console.error('Error saving to cloud:', error);
             }
+        }
 
-            // DOM elements
-            const menuContainer = document.getElementById('menuContainer');
-            const totalItemsSpan = document.getElementById('totalItems');
-            const totalPriceSpan = document.getElementById('totalPrice');
-            const totalPaySpan = document.getElementById('totalPay');
-            const adminArea = document.getElementById('adminArea');
-            const adminSettingsPanel = document.getElementById('adminSettingsPanel');
-            const orderBtn = document.getElementById('orderBtn');
-            const categoryTabs = document.getElementById('categoryTabs');
-
-            // Set initial UI
-            function updateOutletUI() {
-                const statusDot = document.getElementById('statusDot');
-                const statusText = document.getElementById('statusText');
-                const container = document.getElementById('djBitesApp');
-                
-                if (outletOpen) {
-                    statusDot.className = 'status-dot open';
-                    statusText.textContent = 'Outlet Open';
-                    container.classList.remove('outlet-closed');
-                } else {
-                    statusDot.className = 'status-dot closed';
-                    statusText.textContent = 'Outlet Closed';
-                    container.classList.add('outlet-closed');
-                }
-                orderBtn.disabled = !outletOpen;
-            }
-            updateOutletUI();
-
-            // Get unique categories
-            const categories = [...new Set(menuItems.map(item => item.category))];
-
-            function getCategoryIcon(category) {
-                if (category.includes('Momos')) return 'fa-dumpling';
-                if (category.includes('Paneer')) return 'fa-cheese';
-                if (category.includes('Burger')) return 'fa-burger';
-                if (category.includes('Spring')) return 'fa-seedling';
-                if (category.includes('Fries')) return 'fa-french-fries';
-                return 'fa-utensils';
-            }
-
-            // Render category tabs
-            function renderCategoryTabs() {
-                let tabsHtml = '';
-                categories.forEach((cat, index) => {
-                    tabsHtml += `<div class="category-tab ${index === 0 ? 'active' : ''}" onclick="scrollToCategory('${cat.replace(/'/g, "\\'")}', this)">
-                        <i class="fas ${getCategoryIcon(cat)}"></i> ${cat.split(' ')[1] || cat}
-                    </div>`;
-                });
-                categoryTabs.innerHTML = tabsHtml;
-            }
-
-            // Scroll to category
-            window.scrollToCategory = function(category, element) {
-                document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
-                element.classList.add('active');
-                
-                const categoryElement = document.getElementById(`category-${category.replace(/\s+/g, '-')}`);
-                if (categoryElement) {
-                    categoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-                playSound('click');
-            };
-
-            // Admin header
-            function renderAdminHeader() {
-                if (adminActive) {
-                    adminArea.innerHTML = `
-                        <span class="admin-indicator"><i class="fas fa-lock-open"></i> Admin</span>
-                        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Exit</button>
-                    `;
-                    document.getElementById('logoutBtn')?.addEventListener('click', () => {
-                        adminActive = false;
-                        renderAdminHeader();
-                        renderMenu();
-                        adminSettingsPanel.style.display = 'none';
-                        playSound('click');
-                    });
-
-                    adminSettingsPanel.style.display = 'block';
-                    adminSettingsPanel.innerHTML = `
-                        <div class="admin-settings-panel">
-                            <!-- Add New Item Section -->
-                            <div class="add-item-section">
-                                <div class="add-item-title">
-                                    <i class="fas fa-plus-circle"></i> Add New Item
-                                </div>
-                                <input type="text" class="add-item-input" id="newItemName" placeholder="Item Name (e.g., Paneer Tikka)">
-                                <div class="add-item-row">
-                                    <input type="number" class="add-item-input" id="newItemPrice" placeholder="Price (₹)" style="width: 40%;">
-                                    <input type="text" class="add-item-input" id="newItemCategory" placeholder="Category (e.g., 🍔 Burgers)" style="width: 60%;">
-                                </div>
-                                <button class="add-item-btn" onclick="addNewItem()">
-                                    <i class="fas fa-plus"></i> Add to Menu
-                                </button>
-                            </div>
-
-                            <div class="admin-toggle-row">
-                                <span><i class="fas fa-store"></i> Outlet Status</span>
-                                <div class="toggle-switch-container">
-                                    <span class="toggle-label" id="adminToggleLabel">${outletOpen ? 'Open' : 'Closed'}</span>
-                                    <div class="toggle-switch ${outletOpen ? 'active' : ''}" id="adminOutletToggle" onclick="toggleOutlet()">
-                                        <div class="toggle-slider"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="margin: 15px 0;">
-                                <label style="font-weight: 600;"><i class="fab fa-whatsapp"></i> WhatsApp Number:</label>
-                                <input type="text" class="admin-input" id="waNumberInput" value="${whatsappNumber}">
-                            </div>
-                            <div style="margin: 15px 0;">
-                                <label style="font-weight: 600;"><i class="fas fa-globe"></i> Display Format:</label>
-                                <input type="text" class="admin-input" id="waDisplayInput" value="${whatsappDisplay}">
-                            </div>
-                            <button class="save-btn" id="adminSaveBtn"><i class="fas fa-save"></i> Save Changes</button>
-                        </div>
-                    `;
-
-                    document.getElementById('adminSaveBtn')?.addEventListener('click', function() {
-                        const newNumber = document.getElementById('waNumberInput')?.value.trim();
-                        const newDisplay = document.getElementById('waDisplayInput')?.value.trim();
-                        if (newNumber) whatsappNumber = newNumber;
-                        if (newDisplay) whatsappDisplay = newDisplay;
-                        saveAllSettings();
-                    });
-
-                } else {
-                    adminArea.innerHTML = `
-                        <button class="admin-btn" id="adminLoginBtn"><i class="fas fa-lock"></i> Admin</button>
-                    `;
-                    document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
-                        const pwd = prompt('Enter admin password:');
-                        if (pwd === 'dj@123') {
-                            adminActive = true;
-                            renderAdminHeader();
-                            renderMenu();
-                            playSound('success');
-                        } else {
-                            alert('Incorrect password');
-                            playSound('error');
-                        }
-                    });
-                    adminSettingsPanel.style.display = 'none';
-                }
-            }
-
-            // Render menu
-            function renderMenu() {
-                let html = '';
-                categories.forEach(cat => {
-                    const catId = `category-${cat.replace(/\s+/g, '-')}`;
-                    html += `<div id="${catId}" class="category-section">`;
-                    html += `<div class="category-header"><i class="fas ${getCategoryIcon(cat)}"></i><h3>${cat}</h3></div>`;
-                    
-                    const catItems = menuItems.filter(item => item.category === cat);
-                    catItems.forEach(item => {
-                        const itemId = item.id;
-                        const isOutOfStock = outOfStockItems.includes(itemId);
-                        const imgSrc = itemImages[itemId] || '';
-                        
-                        // Image HTML with proper ID for each item
-                        const imgHtml = imgSrc ? 
-                            `<img class="item-image" id="img_${itemId}" src="${imgSrc}" alt="${item.name}" 
-                                  onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div class=\\'image-placeholder\\'><i class=\\'fas fa-image\\'></i><span>photo</span></div>';">` : 
-                            `<div class="image-placeholder" id="img_${itemId}"><i class="fas fa-image"></i><span>photo</span></div>`;
-
-                        if (adminActive) {
-                            html += `
-                                <div class="menu-item ${isOutOfStock ? 'out-of-stock' : ''}">
-                                    ${isOutOfStock ? '<div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT OF STOCK</div>' : ''}
-                                    <div class="item-image-block">
-                                        <form method="post" enctype="multipart/form-data" style="position: relative; width: 100%; height: 100%;">
-                                            ${imgHtml}
-                                            <input type="file" accept="image/*" style="position: absolute; bottom: 5px; right: 5px; width: 30px; height: 30px; opacity: 0; cursor: pointer;" onchange="uploadImage(this, '${itemId}')" title="Upload Photo">
-                                            <label style="position: absolute; bottom: 5px; right: 5px; background: #fc8019; color: white; padding: 3px 6px; border-radius: 20px; font-size: 0.6rem; pointer-events: none;"><i class="fas fa-cloud-upload-alt"></i></label>
-                                        </form>
-                                    </div>
-                                    <div class="item-info">
-                                        <input type="text" class="admin-name-input" id="name-${itemId}" value="${item.name}" onchange="updateItemName('${itemId}', this.value)" placeholder="Item name">
-                                        <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
-                                            <span>₹</span>
-                                            <input type="number" class="admin-price-input" id="price-${itemId}" value="${item.price}" step="1" min="0" onchange="updatePrice('${itemId}', this.value)">
-                                        </div>
-                                        <div class="stock-toggle">
-                                            <button class="stock-toggle-btn ${isOutOfStock ? 'out' : 'in'}" onclick="toggleStock('${itemId}')">
-                                                ${isOutOfStock ? '<i class="fas fa-times-circle"></i> Out of Stock' : '<i class="fas fa-check-circle"></i> In Stock'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="qty-control">
-                                        <button class="qty-btn" onclick="window.updateQty('${item.id}', -1)"><i class="fas fa-minus"></i></button>
-                                        <span class="qty-num" id="qty-${item.id}">${quantities[item.id]}</span>
-                                        <button class="qty-btn" onclick="window.updateQty('${item.id}', 1)"><i class="fas fa-plus"></i></button>
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            if (isOutOfStock) {
-                                html += `
-                                    <div class="menu-item out-of-stock">
-                                        <div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT OF STOCK</div>
-                                        <div class="item-image-block">${imgHtml}</div>
-                                        <div class="item-info">
-                                            <div class="item-name">${item.name}</div>
-                                            <div class="item-price">₹${item.price}</div>
-                                        </div>
-                                        <div class="qty-control" style="opacity: 0.3; pointer-events: none;">
-                                            <button class="qty-btn"><i class="fas fa-minus"></i></button>
-                                            <span class="qty-num">0</span>
-                                            <button class="qty-btn"><i class="fas fa-plus"></i></button>
-                                        </div>
-                                    </div>
-                                `;
-                            } else {
-                                html += `
-                                    <div class="menu-item">
-                                        <div class="item-image-block">${imgHtml}</div>
-                                        <div class="item-info">
-                                            <div class="item-name">${item.name}</div>
-                                            <div class="item-price">₹${item.price}</div>
-                                        </div>
-                                        <div class="qty-control">
-                                            <button class="qty-btn" onclick="window.updateQty('${item.id}', -1)"><i class="fas fa-minus"></i></button>
-                                            <span class="qty-num" id="qty-${item.id}">${quantities[item.id]}</span>
-                                            <button class="qty-btn" onclick="window.updateQty('${item.id}', 1)"><i class="fas fa-plus"></i></button>
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        }
-                    });
-                    html += `</div>`;
-                });
-                menuContainer.innerHTML = html;
-                updateTotals();
-            }
-
-            // Price update
-            window.updatePrice = function(itemId, newPrice) {
-                const price = parseInt(newPrice, 10) || 0;
-                const item = menuItems.find(i => i.id === itemId);
-                if (item) {
-                    item.price = price;
-                    updateTotals();
-                    playSound('click');
-                }
-            };
-
-            // Quantity update - With voice announcement
-            window.updateQty = function(id, delta) {
-                if (!outletOpen) {
-                    alert('❌ Outlet is closed. Please visit during opening hours.');
-                    playSound('error');
-                    return;
-                }
-                
-                if (outOfStockItems.includes(id)) {
-                    alert('❌ This item is currently out of stock');
-                    playSound('error');
-                    return;
-                }
-                
-                const newVal = quantities[id] + delta;
-                if (newVal >= 0) {
-                    quantities[id] = newVal;
-                    const qtySpan = document.getElementById(`qty-${id}`);
-                    if (qtySpan) qtySpan.innerText = newVal;
-                    updateTotals();
-                    
-                    if (delta > 0) {
-                        const item = menuItems.find(i => i.id === id);
-                        if (item) {
-                            speakItemName(item.name);
-                        }
-                        playSound('add');
-                    } else {
-                        playSound('remove');
-                    }
-                }
-            };
-
-            // Update totals
-            function updateTotals() {
-                let totalItems = 0, totalPrice = 0;
-                menuItems.forEach(item => {
-                    if (!outOfStockItems.includes(item.id)) {
-                        const q = quantities[item.id];
-                        totalItems += q;
-                        totalPrice += q * item.price;
-                    }
-                });
-                totalItemsSpan.innerText = totalItems;
-                totalPriceSpan.innerText = `₹${totalPrice}`;
-                totalPaySpan.innerText = `₹${totalPrice}`;
-            }
-
-            // Order button click
-            orderBtn.addEventListener('click', function() {
-                if (!outletOpen) {
-                    alert('❌ Outlet is currently closed. Please visit during opening hours.');
-                    playSound('error');
-                    return;
-                }
-                
-                let hasItems = false;
-                menuItems.forEach(item => {
-                    if (!outOfStockItems.includes(item.id) && quantities[item.id] > 0) hasItems = true;
-                });
-                
-                if (!hasItems) {
-                    alert('Please add items to your order 🛒');
-                    playSound('error');
-                    return;
-                }
-                
-                openCustomerModal();
-            });
-
-            // Initialize
-            renderCategoryTabs();
-            renderAdminHeader();
-            renderMenu();
-            updateTotalOrdersDisplay();
-
-            // Load saved images on page load
-            loadSavedImages();
-
-        })();
-
-        // ========== ImgBB Integration - Exact code from screenshot ==========
-        
-        // Step 2: ImgBB API Key (from screenshot)
-        const IMGBB_KEY = "33a4ac4bf9160466bd7103e1b516fc23";
-
-        // Step 2: Image upload function
-        async function uploadImage(input, itemId) {
+        // ========== IMAGE UPLOAD FUNCTION ==========
+        window.uploadImage = async function(input, itemId) {
             const file = input.files[0];
             if (!file) return;
 
             // Show uploading notification
-            const progress = document.getElementById('uploadProgress');
-            if (progress) progress.style.display = 'flex';
+            showUploadProgress(true);
+            showNotification('📤 Uploading to ImgBB...');
 
             const formData = new FormData();
             formData.append("image", file);
 
             try {
                 // Upload to ImgBB
-                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}&tag=food`, {
+                const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -2090,14 +1427,14 @@
                 if (data.success) {
                     const imageUrl = data.data.url;
                     
-                    // Save permanently in browser database
-                    localStorage.setItem("food_img_" + itemId, imageUrl);
+                    // Save in memory
+                    itemImages[itemId] = imageUrl;
                     
-                    // Also save in our main state
-                    if (window.itemImages) {
-                        window.itemImages[itemId] = imageUrl;
-                        localStorage.setItem('dj_bites_images', JSON.stringify(window.itemImages));
-                    }
+                    // Save to localStorage
+                    localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
+                    
+                    // Save to cloud (JSONBin.io) - sabhi phones ke liye
+                    await saveImagesToCloud();
                     
                     // Update UI instantly
                     const imgElement = document.getElementById("img_" + itemId);
@@ -2117,29 +1454,66 @@
                         }
                     }
                     
-                    alert("Image uploaded successfully ✅");
+                    showUploadProgress(false);
+                    showNotification("✅ Image uploaded to cloud successfully!");
                 } else {
                     throw new Error('Upload failed');
                 }
             } catch (err) {
-                alert("Upload failed ❌");
+                showUploadProgress(false);
+                showNotification("❌ Upload failed");
                 console.log(err);
-            } finally {
-                // Hide progress
-                const progress = document.getElementById('uploadProgress');
-                if (progress) progress.style.display = 'none';
-                
-                // Clear input
-                input.value = '';
             }
-        }
+            
+            // Clear input
+            input.value = '';
+        };
 
-        // Step 4: Load saved images on page load
-        function loadSavedImages() {
-            // Get all elements with id starting with 'img_'
+        // ========== ZOOM IMAGE FUNCTION ==========
+        window.zoomImage = function(itemId, itemName) {
+            const imageUrl = itemImages[itemId];
+            if (!imageUrl) {
+                showNotification('❌ No image available');
+                return;
+            }
+            
+            const zoomModal = document.getElementById('zoomModal');
+            const zoomImage = document.getElementById('zoomImage');
+            const zoomItemName = document.getElementById('zoomItemName');
+            
+            zoomImage.src = imageUrl;
+            zoomItemName.textContent = itemName;
+            zoomModal.style.display = 'flex';
+            
+            // Prevent body scrolling
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeZoomModal = function() {
+            document.getElementById('zoomModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        // Load saved images on page load
+        window.loadSavedImages = async function() {
+            if (USE_CLOUD) {
+                await loadImagesFromCloud();
+            }
+            
+            // Also check localStorage for any images not in cloud yet
+            const storedImages = localStorage.getItem('dj_bites_images');
+            if (storedImages) {
+                try {
+                    const localImages = JSON.parse(storedImages) || {};
+                    // Merge with cloud images (cloud takes priority)
+                    itemImages = { ...localImages, ...itemImages };
+                } catch { }
+            }
+            
+            // Update all image elements
             document.querySelectorAll('[id^="img_"]').forEach(element => {
                 const itemId = element.id.replace("img_", "");
-                const saved = localStorage.getItem("food_img_" + itemId);
+                const saved = itemImages[itemId];
                 
                 if (saved) {
                     if (element.tagName === 'IMG') {
@@ -2157,15 +1531,922 @@
                     }
                 }
             });
+        };
+
+        // Load data from localStorage
+        function loadStored() {
+            const storedPrices = localStorage.getItem('dj_bites_prices');
+            if (storedPrices) {
+                try {
+                    const priceMap = JSON.parse(storedPrices);
+                    menuItems = BASE_ITEMS.map(item => ({
+                        ...item,
+                        price: priceMap[item.id] !== undefined ? priceMap[item.id] : item.basePrice
+                    }));
+                } catch { fallback(); }
+            } else { fallback(); }
+            
+            function fallback() {
+                menuItems = BASE_ITEMS.map(item => ({ ...item, price: item.basePrice }));
+            }
+
+            // Load custom items
+            const storedItems = localStorage.getItem('dj_bites_custom_items');
+            if (storedItems) {
+                try {
+                    const customItems = JSON.parse(storedItems);
+                    customItems.forEach(customItem => {
+                        if (!menuItems.find(item => item.id === customItem.id)) {
+                            menuItems.push(customItem);
+                        }
+                    });
+                } catch { }
+            }
+
+            // Load images from localStorage (temporary)
+            const storedImages = localStorage.getItem('dj_bites_images');
+            if (storedImages) {
+                try { 
+                    itemImages = JSON.parse(storedImages) || {};
+                } catch { 
+                    itemImages = {}; 
+                }
+            }
+
+            const storedWA = localStorage.getItem('dj_bites_whatsapp');
+            if (storedWA) {
+                try {
+                    const wa = JSON.parse(storedWA);
+                    whatsappNumber = wa.number || '919540828708';
+                    whatsappDisplay = wa.display || '+91 95408 28708';
+                } catch { }
+            }
+
+            const storedOutlet = localStorage.getItem('dj_bites_outlet');
+            if (storedOutlet) {
+                outletOpen = storedOutlet === 'true';
+            }
+
+            // Load custom names
+            const storedNames = localStorage.getItem('dj_bites_names');
+            if (storedNames) {
+                try {
+                    const nameMap = JSON.parse(storedNames);
+                    menuItems = menuItems.map(item => ({
+                        ...item,
+                        name: nameMap[item.id] || item.name
+                    }));
+                } catch { }
+            }
+
+            menuItems.forEach(item => quantities[item.id] = 0);
+        }
+        loadStored();
+
+        // Save all settings
+        function saveAllSettings() {
+            const priceMap = {};
+            const nameMap = {};
+            menuItems.forEach(item => {
+                priceMap[item.id] = item.price;
+                nameMap[item.id] = item.name;
+            });
+            localStorage.setItem('dj_bites_prices', JSON.stringify(priceMap));
+            localStorage.setItem('dj_bites_names', JSON.stringify(nameMap));
+            localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
+            localStorage.setItem('dj_bites_whatsapp', JSON.stringify({ number: whatsappNumber, display: whatsappDisplay }));
+            localStorage.setItem('dj_bites_out_of_stock', JSON.stringify(outOfStockItems));
+            localStorage.setItem('dj_bites_outlet', outletOpen.toString());
+            
+            // Save custom items separately
+            const customItems = menuItems.filter(item => 
+                !BASE_ITEMS.find(baseItem => baseItem.id === item.id)
+            );
+            localStorage.setItem('dj_bites_custom_items', JSON.stringify(customItems));
+            
+            // Also save images to cloud
+            if (USE_CLOUD) {
+                saveImagesToCloud();
+            }
+            
+            showNotification('✅ Settings saved!');
+            playSound('success');
         }
 
-        // Make these functions globally available
-        window.uploadImage = uploadImage;
-        window.loadSavedImages = loadSavedImages;
+        // Audio System
+        let audioCtx = null;
+        let masterGain = null;
+        let lastSoundTime = 0;
+        const SOUND_COOLDOWN = 100;
 
-        // Auto load images when page loads
-        window.addEventListener('load', function() {
-            setTimeout(loadSavedImages, 100);
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.connect(audioCtx.destination);
+                masterGain.gain.value = 0.25;
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const now = Date.now();
+                if (now - lastSoundTime < SOUND_COOLDOWN) return;
+                lastSoundTime = now;
+
+                const ctx = initAudio();
+                if (ctx.state === 'suspended') {
+                    ctx.resume().then(() => playSound(type));
+                    return;
+                }
+
+                const currentTime = ctx.currentTime;
+                
+                if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    osc.frequency.value = 620;
+                    gain.gain.setValueAtTime(0.12, currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.08);
+                    
+                    osc.start(currentTime);
+                    osc.stop(currentTime + 0.08);
+                }
+                else if (type === 'add') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    osc.frequency.value = 740;
+                    gain.gain.setValueAtTime(0.15, currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.1);
+                    
+                    osc.start(currentTime);
+                    osc.stop(currentTime + 0.1);
+                }
+                else if (type === 'remove') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    osc.frequency.value = 440;
+                    gain.gain.setValueAtTime(0.12, currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.12);
+                    
+                    osc.start(currentTime);
+                    osc.stop(currentTime + 0.12);
+                }
+                else if (type === 'order') {
+                    const notes = [523, 659, 783, 880];
+                    notes.forEach((freq, i) => {
+                        setTimeout(() => {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.connect(gain);
+                            gain.connect(masterGain);
+                            
+                            osc.frequency.value = freq;
+                            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                            
+                            osc.start();
+                            osc.stop(ctx.currentTime + 0.15);
+                        }, i * 120);
+                    }, this);
+                }
+                else if (type === 'success') {
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    osc1.frequency.value = 659;
+                    osc2.frequency.value = 1318;
+                    
+                    gain.gain.setValueAtTime(0.15, currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.25);
+                    
+                    osc1.start(currentTime);
+                    osc2.start(currentTime);
+                    osc1.stop(currentTime + 0.25);
+                    osc2.stop(currentTime + 0.25);
+                }
+                else if (type === 'error') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    osc.frequency.value = 220;
+                    gain.gain.setValueAtTime(0.15, currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.2);
+                    
+                    osc.start(currentTime);
+                    osc.stop(currentTime + 0.2);
+                }
+                else if (type === 'toggle') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    
+                    osc.frequency.value = 880;
+                    gain.gain.setValueAtTime(0.1, currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.05);
+                    
+                    osc.start(currentTime);
+                    osc.stop(currentTime + 0.05);
+                }
+            } catch (e) { /* Silent fallback */ }
+        }
+
+        // Show/hide upload progress
+        function showUploadProgress(show) {
+            const progress = document.getElementById('uploadProgress');
+            if (progress) {
+                progress.style.display = show ? 'flex' : 'none';
+            }
+        }
+
+        // Show notification
+        function showNotification(msg) {
+            const notifDiv = document.getElementById('notificationArea');
+            notifDiv.innerHTML = `<div class="notification">${msg}</div>`;
+            setTimeout(() => { notifDiv.innerHTML = ''; }, 2500);
+        }
+
+        // Clear today's orders - Now accessible globally
+        window.clearTodayOrders = function() {
+            const pwd = prompt('Enter password to clear today\'s orders:');
+            if (pwd === 'dj@123') {
+                const today = new Date().toDateString();
+                orders = orders.filter(order => new Date(order.timestamp).toDateString() !== today);
+                localStorage.setItem('dj_bites_orders', JSON.stringify(orders));
+                updateTotalOrdersDisplay();
+                showNotification('🗑️ Today\'s orders cleared!');
+                playSound('success');
+                
+                // Update admin panel if open
+                if (adminActive) {
+                    renderAdminHeader();
+                }
+            } else {
+                alert('Incorrect password');
+                playSound('error');
+            }
+        };
+
+        // Get today's orders count
+        function getTodayOrdersCount() {
+            const today = new Date().toDateString();
+            return orders.filter(order => new Date(order.timestamp).toDateString() === today).length;
+        }
+
+        // Get today's total revenue
+        function getTodayRevenue() {
+            const today = new Date().toDateString();
+            return orders
+                .filter(order => new Date(order.timestamp).toDateString() === today)
+                .reduce((sum, order) => sum + (order.total || 0), 0);
+        }
+
+        // Toggle outlet status
+        window.toggleOutlet = function() {
+            outletOpen = !outletOpen;
+            
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const container = document.getElementById('djBitesApp');
+            const adminToggle = document.getElementById('adminOutletToggle');
+            const adminLabel = document.getElementById('adminToggleLabel');
+            
+            if (outletOpen) {
+                statusDot.className = 'status-dot open';
+                statusText.textContent = 'Outlet Open';
+                container.classList.remove('outlet-closed');
+                if (adminToggle) {
+                    adminToggle.classList.add('active');
+                    adminLabel.textContent = 'Open';
+                }
+            } else {
+                statusDot.className = 'status-dot closed';
+                statusText.textContent = 'Outlet Closed';
+                container.classList.add('outlet-closed');
+                if (adminToggle) {
+                    adminToggle.classList.remove('active');
+                    adminLabel.textContent = 'Closed';
+                }
+            }
+            
+            document.getElementById('orderBtn').disabled = !outletOpen;
+            localStorage.setItem('dj_bites_outlet', outletOpen.toString());
+            playSound('toggle');
+            showNotification(outletOpen ? '🟢 Outlet is now OPEN' : '🔴 Outlet is now CLOSED');
+        };
+
+        // Add new item
+        window.addNewItem = function() {
+            const name = document.getElementById('newItemName').value.trim();
+            const price = parseInt(document.getElementById('newItemPrice').value);
+            const category = document.getElementById('newItemCategory').value.trim();
+            
+            if (!name || !price || !category) {
+                alert('Please fill all fields');
+                playSound('error');
+                return;
+            }
+            
+            const id = 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            
+            const newItem = {
+                id: id,
+                name: name,
+                basePrice: price,
+                price: price,
+                category: category
+            };
+            
+            menuItems.push(newItem);
+            quantities[id] = 0;
+            
+            document.getElementById('newItemName').value = '';
+            document.getElementById('newItemPrice').value = '';
+            document.getElementById('newItemCategory').value = '';
+            
+            saveAllSettings();
+            renderMenu();
+            renderCategoryTabs();
+            
+            showNotification('✅ New item added!');
+            playSound('success');
+        };
+
+        // Toggle item stock
+        window.toggleStock = function(itemId) {
+            if (outOfStockItems.includes(itemId)) {
+                outOfStockItems = outOfStockItems.filter(id => id !== itemId);
+            } else {
+                outOfStockItems.push(itemId);
+            }
+            renderMenu();
+            playSound('toggle');
+        };
+
+        // Update item name
+        window.updateItemName = function(itemId, newName) {
+            const item = menuItems.find(i => i.id === itemId);
+            if (item) {
+                item.name = newName;
+                playSound('click');
+            }
+        };
+
+        // Price update
+        window.updatePrice = function(itemId, newPrice) {
+            const price = parseInt(newPrice, 10) || 0;
+            const item = menuItems.find(i => i.id === itemId);
+            if (item) {
+                item.price = price;
+                updateTotals();
+                playSound('click');
+            }
+        };
+
+        // Quantity update
+        window.updateQty = function(id, delta) {
+            if (!outletOpen) {
+                alert('❌ Outlet is closed. Please visit during opening hours.');
+                playSound('error');
+                return;
+            }
+            
+            if (outOfStockItems.includes(id)) {
+                alert('❌ This item is currently out of stock');
+                playSound('error');
+                return;
+            }
+            
+            const newVal = quantities[id] + delta;
+            if (newVal >= 0) {
+                quantities[id] = newVal;
+                const qtySpan = document.getElementById(`qty-${id}`);
+                if (qtySpan) qtySpan.innerText = newVal;
+                updateTotals();
+                
+                if (delta > 0) {
+                    playSound('add');
+                } else {
+                    playSound('remove');
+                }
+            }
+        };
+
+        // Update totals
+        function updateTotals() {
+            let totalItems = 0, totalPrice = 0;
+            menuItems.forEach(item => {
+                if (!outOfStockItems.includes(item.id)) {
+                    const q = quantities[item.id];
+                    totalItems += q;
+                    totalPrice += q * item.price;
+                }
+            });
+            const totalItemsSpan = document.getElementById('totalItems');
+            const totalPriceSpan = document.getElementById('totalPrice');
+            const totalPaySpan = document.getElementById('totalPay');
+            if (totalItemsSpan) totalItemsSpan.innerText = totalItems;
+            if (totalPriceSpan) totalPriceSpan.innerText = `₹${totalPrice}`;
+            if (totalPaySpan) totalPaySpan.innerText = `₹${totalPrice}`;
+        }
+
+        // Generate order ID
+        function generateOrderId() {
+            const now = new Date();
+            const date = now.getDate().toString().padStart(2, '0');
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const year = now.getFullYear().toString().slice(-2);
+            const random = Math.floor(1000 + Math.random() * 9000);
+            return `${date}${month}${year}-${random}`;
+        }
+
+        // Get order count
+        function getOrderCountForPhone(phone) {
+            const today = new Date().toDateString();
+            return orders.filter(order => 
+                order.phone === phone && 
+                new Date(order.timestamp).toDateString() === today
+            ).length;
+        }
+
+        // Update total orders display (for admin)
+        function updateTotalOrdersDisplay() {
+            // Only used internally for admin
+        }
+
+        // Save order
+        function saveOrder(customerName, phone, items, total) {
+            const orderId = generateOrderId();
+            const order = {
+                id: orderId,
+                name: customerName,
+                phone: phone,
+                items: items,
+                total: total,
+                timestamp: new Date().toISOString()
+            };
+            
+            orders.push(order);
+            localStorage.setItem('dj_bites_orders', JSON.stringify(orders));
+            return orderId;
+        }
+
+        // Get order preview
+        function getOrderPreviewHTML() {
+            let html = '';
+            let total = 0;
+            let hasItems = false;
+            
+            menuItems.forEach(item => {
+                if (outOfStockItems.includes(item.id)) return;
+                const qty = quantities[item.id];
+                if (qty > 0) {
+                    hasItems = true;
+                    const itemTotal = qty * item.price;
+                    total += itemTotal;
+                    html += `
+                        <div class="preview-item">
+                            <span>${item.name} x ${qty}</span>
+                            <span>₹${itemTotal}</span>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (!hasItems) {
+                html = '<div style="text-align: center; color: #999; padding: 20px;">No items selected</div>';
+            } else {
+                html += `<div class="preview-total">Total: ₹${total}</div>`;
+            }
+            
+            return html;
+        }
+
+        // Show order history
+        window.showOrderHistory = function() {
+            const today = new Date().toDateString();
+            const todayOrders = orders.filter(order => new Date(order.timestamp).toDateString() === today);
+            
+            let historyHtml = '';
+            if (todayOrders.length === 0) {
+                historyHtml = '<div style="text-align: center; padding: 20px; color: #999;">No orders today</div>';
+            } else {
+                todayOrders.reverse().forEach(order => {
+                    const time = new Date(order.timestamp).toLocaleTimeString();
+                    historyHtml += `
+                        <div class="preview-item" style="flex-direction: column; align-items: flex-start; gap: 5px;">
+                            <div style="display: flex; justify-content: space-between; width: 100%;">
+                                <span style="font-weight: 700; color: #fc8019;">#${order.id}</span>
+                                <span style="font-weight: 700;">₹${order.total}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.85rem;">
+                                <span>${order.name}</span>
+                                <span style="color: #999;">${time}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            document.getElementById('orderHistoryList').innerHTML = historyHtml;
+            document.getElementById('historyModal').style.display = 'flex';
+            playSound('click');
+        };
+
+        window.closeHistoryModal = function() {
+            document.getElementById('historyModal').style.display = 'none';
+        };
+
+        // Modal functions
+        window.openCustomerModal = function() {
+            if (!outletOpen) {
+                alert('❌ Outlet is currently closed. Please visit during opening hours.');
+                playSound('error');
+                return;
+            }
+            
+            const preview = getOrderPreviewHTML();
+            document.getElementById('orderPreview').innerHTML = preview;
+            document.getElementById('modalPhone').textContent = whatsappDisplay;
+            document.getElementById('customerModal').style.display = 'flex';
+            playSound('click');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('customerModal').style.display = 'none';
+            document.getElementById('customerName').value = '';
+        };
+
+        window.submitCustomerInfo = function() {
+            const name = document.getElementById('customerName').value.trim();
+            if (!name) {
+                alert('Please enter your name');
+                playSound('error');
+                return;
+            }
+            
+            closeModal();
+            placeOrder(name);
+        };
+
+        // Place order
+        function placeOrder(customerName) {
+            let orderLines = [];
+            let orderItems = [];
+            let totalPrice = 0;
+            
+            menuItems.forEach(item => {
+                if (outOfStockItems.includes(item.id)) return;
+                const qty = quantities[item.id];
+                if (qty > 0) {
+                    const itemTotal = qty * item.price;
+                    totalPrice += itemTotal;
+                    orderLines.push(`• ${item.name} × ${qty} = ₹${itemTotal}`);
+                    orderItems.push({ name: item.name, qty: qty, price: item.price, total: itemTotal });
+                }
+            });
+            
+            if (orderLines.length === 0) {
+                alert('Please add items to your order 🛒');
+                playSound('error');
+                return;
+            }
+            
+            const orderId = saveOrder(customerName, whatsappNumber, orderItems, totalPrice);
+            const orderCount = getOrderCountForPhone(whatsappNumber);
+            
+            let message = `🍔 *DJ BITES - PURE VEG* 🍔\n\n`;
+            message += `👤 *Customer:* ${customerName}\n`;
+            message += `📱 *Phone:* ${whatsappDisplay}\n`;
+            message += `🆔 *Order ID:* #${orderId}\n`;
+            message += `📊 *Order #${orderCount} today*\n\n`;
+            message += `*YOUR ORDER:*\n`;
+            message += orderLines.join('\n');
+            message += `\n\n*TOTAL: ₹${totalPrice}*\n\n`;
+            message += `🙏 Thank you for ordering!\n`;
+            message += `⭐ Visit again - DJ Bites`;
+
+            playSound('order');
+            
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, '_blank');
+            
+            // Clear quantities
+            menuItems.forEach(item => quantities[item.id] = 0);
+            renderMenu();
+            showNotification(`🎉 Order #${orderId} placed!`);
+        }
+
+        // DOM elements
+        const menuContainer = document.getElementById('menuContainer');
+        const adminArea = document.getElementById('adminArea');
+        const adminSettingsPanel = document.getElementById('adminSettingsPanel');
+        const orderBtn = document.getElementById('orderBtn');
+        const categoryTabs = document.getElementById('categoryTabs');
+
+        // Set initial UI
+        function updateOutletUI() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const container = document.getElementById('djBitesApp');
+            
+            if (outletOpen) {
+                statusDot.className = 'status-dot open';
+                statusText.textContent = 'Outlet Open';
+                container.classList.remove('outlet-closed');
+            } else {
+                statusDot.className = 'status-dot closed';
+                statusText.textContent = 'Outlet Closed';
+                container.classList.add('outlet-closed');
+            }
+            if (orderBtn) orderBtn.disabled = !outletOpen;
+        }
+        updateOutletUI();
+
+        // Get unique categories
+        const categories = [...new Set(menuItems.map(item => item.category))];
+
+        function getCategoryIcon(category) {
+            if (category.includes('Momos')) return 'fa-dumpling';
+            if (category.includes('Paneer')) return 'fa-cheese';
+            if (category.includes('Burger')) return 'fa-burger';
+            if (category.includes('Spring')) return 'fa-seedling';
+            if (category.includes('Fries')) return 'fa-french-fries';
+            return 'fa-utensils';
+        }
+
+        // Render category tabs
+        function renderCategoryTabs() {
+            let tabsHtml = '';
+            categories.forEach((cat, index) => {
+                tabsHtml += `<div class="category-tab ${index === 0 ? 'active' : ''}" onclick="scrollToCategory('${cat.replace(/'/g, "\\'")}', this)">
+                    <i class="fas ${getCategoryIcon(cat)}"></i> ${cat.split(' ')[1] || cat}
+                </div>`;
+            });
+            if (categoryTabs) categoryTabs.innerHTML = tabsHtml;
+        }
+
+        // Scroll to category
+        window.scrollToCategory = function(category, element) {
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            
+            const categoryElement = document.getElementById(`category-${category.replace(/\s+/g, '-')}`);
+            if (categoryElement) {
+                categoryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            playSound('click');
+        };
+
+        // Admin header - Now includes Order Management
+        function renderAdminHeader() {
+            if (adminActive) {
+                adminArea.innerHTML = `
+                    <span class="admin-indicator"><i class="fas fa-lock-open"></i> Admin</span>
+                    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Exit</button>
+                `;
+                document.getElementById('logoutBtn')?.addEventListener('click', () => {
+                    adminActive = false;
+                    renderAdminHeader();
+                    renderMenu();
+                    adminSettingsPanel.style.display = 'none';
+                    playSound('click');
+                });
+
+                adminSettingsPanel.style.display = 'block';
+                
+                // Get today's stats
+                const todayOrdersCount = getTodayOrdersCount();
+                const todayRevenue = getTodayRevenue();
+                
+                adminSettingsPanel.innerHTML = `
+                    <div class="admin-settings-panel">
+                        <!-- Order Management Section - Inside Admin Panel -->
+                        <div class="admin-order-section">
+                            <div class="admin-order-header">
+                                <div class="admin-order-title">
+                                    <i class="fas fa-shopping-cart"></i> Today's Orders
+                                </div>
+                                <div class="admin-order-stats">
+                                    <div class="admin-stat-box">
+                                        <div class="admin-stat-number">${todayOrdersCount}</div>
+                                        <div class="admin-stat-label">Orders</div>
+                                    </div>
+                                    <div class="admin-stat-box">
+                                        <div class="admin-stat-number">₹${todayRevenue}</div>
+                                        <div class="admin-stat-label">Revenue</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="admin-view-orders-btn" onclick="showOrderHistory()">
+                                <i class="fas fa-eye"></i> View All Orders
+                            </button>
+                            
+                            <button class="admin-clear-btn" onclick="clearTodayOrders()">
+                                <i class="fas fa-trash"></i> Clear Today's Orders
+                            </button>
+                        </div>
+
+                        <!-- Add New Item Section -->
+                        <div class="add-item-section">
+                            <div class="add-item-title">
+                                <i class="fas fa-plus-circle"></i> Add New Item
+                            </div>
+                            <input type="text" class="add-item-input" id="newItemName" placeholder="Item Name (e.g., Paneer Tikka)">
+                            <div class="add-item-row">
+                                <input type="number" class="add-item-input" id="newItemPrice" placeholder="Price (₹)" style="width: 40%;">
+                                <input type="text" class="add-item-input" id="newItemCategory" placeholder="Category (e.g., 🍔 Burgers)" style="width: 60%;">
+                            </div>
+                            <button class="add-item-btn" onclick="addNewItem()">
+                                <i class="fas fa-plus"></i> Add to Menu
+                            </button>
+                        </div>
+
+                        <div class="admin-toggle-row">
+                            <span><i class="fas fa-store"></i> Outlet Status</span>
+                            <div class="toggle-switch-container">
+                                <span class="toggle-label" id="adminToggleLabel">${outletOpen ? 'Open' : 'Closed'}</span>
+                                <div class="toggle-switch ${outletOpen ? 'active' : ''}" id="adminOutletToggle" onclick="toggleOutlet()">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin: 15px 0;">
+                            <label style="font-weight: 600;"><i class="fab fa-whatsapp"></i> WhatsApp Number:</label>
+                            <input type="text" class="admin-input" id="waNumberInput" value="${whatsappNumber}">
+                        </div>
+                        <div style="margin: 15px 0;">
+                            <label style="font-weight: 600;"><i class="fas fa-globe"></i> Display Format:</label>
+                            <input type="text" class="admin-input" id="waDisplayInput" value="${whatsappDisplay}">
+                        </div>
+                        <button class="save-btn" id="adminSaveBtn"><i class="fas fa-save"></i> Save Changes</button>
+                    </div>
+                `;
+
+                document.getElementById('adminSaveBtn')?.addEventListener('click', function() {
+                    const newNumber = document.getElementById('waNumberInput')?.value.trim();
+                    const newDisplay = document.getElementById('waDisplayInput')?.value.trim();
+                    if (newNumber) whatsappNumber = newNumber;
+                    if (newDisplay) whatsappDisplay = newDisplay;
+                    saveAllSettings();
+                });
+
+            } else {
+                adminArea.innerHTML = `
+                    <button class="admin-btn" id="adminLoginBtn"><i class="fas fa-lock"></i> Admin</button>
+                `;
+                document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
+                    const pwd = prompt('Enter admin password:');
+                    if (pwd === 'dj@123') {
+                        adminActive = true;
+                        renderAdminHeader();
+                        renderMenu();
+                        playSound('success');
+                    } else {
+                        alert('Incorrect password');
+                        playSound('error');
+                    }
+                });
+                adminSettingsPanel.style.display = 'none';
+            }
+        }
+
+        // Render menu
+        function renderMenu() {
+            let html = '';
+            categories.forEach(cat => {
+                const catId = `category-${cat.replace(/\s+/g, '-')}`;
+                html += `<div id="${catId}" class="category-section">`;
+                html += `<div class="category-header"><i class="fas ${getCategoryIcon(cat)}"></i><h3>${cat}</h3></div>`;
+                
+                const catItems = menuItems.filter(item => item.category === cat);
+                catItems.forEach(item => {
+                    const itemId = item.id;
+                    const isOutOfStock = outOfStockItems.includes(itemId);
+                    const imgSrc = itemImages[itemId] || '';
+                    
+                    // Image HTML with proper ID and click handler for zoom
+                    const imgHtml = imgSrc ? 
+                        `<img class="item-image" id="img_${itemId}" src="${imgSrc}" alt="${item.name}" 
+                              onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div class=\\'image-placeholder\\' id=\\'img_${itemId}\\'><i class=\\'fas fa-image\\'></i><span>photo</span></div>';">` : 
+                        `<div class="image-placeholder" id="img_${itemId}"><i class="fas fa-image"></i><span>photo</span></div>`;
+
+                    if (adminActive) {
+                        html += `
+                            <div class="menu-item ${isOutOfStock ? 'out-of-stock' : ''}">
+                                ${isOutOfStock ? '<div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT OF STOCK</div>' : ''}
+                                <div class="item-image-block" onclick="zoomImage('${itemId}', '${item.name.replace(/'/g, "\\'")}')">
+                                    <div style="position: relative; width: 100%; height: 100%;">
+                                        ${imgHtml}
+                                        <input type="file" accept="image/*" style="position: absolute; bottom: 5px; right: 5px; width: 30px; height: 30px; opacity: 0; cursor: pointer; z-index: 10;" onclick="event.stopPropagation()" onchange="uploadImage(this, '${itemId}')" title="Upload Photo">
+                                        <label style="position: absolute; bottom: 5px; right: 5px; background: #fc8019; color: white; padding: 3px 6px; border-radius: 20px; font-size: 0.6rem; pointer-events: none;"><i class="fas fa-cloud-upload-alt"></i></label>
+                                    </div>
+                                </div>
+                                <div class="item-info">
+                                    <input type="text" class="admin-name-input" id="name-${itemId}" value="${item.name}" onchange="updateItemName('${itemId}', this.value)" placeholder="Item name">
+                                    <div style="display: flex; align-items: center; gap: 5px; margin-top: 5px;">
+                                        <span>₹</span>
+                                        <input type="number" class="admin-price-input" id="price-${itemId}" value="${item.price}" step="1" min="0" onchange="updatePrice('${itemId}', this.value)">
+                                    </div>
+                                    <div class="stock-toggle">
+                                        <button class="stock-toggle-btn ${isOutOfStock ? 'out' : 'in'}" onclick="toggleStock('${itemId}')">
+                                            ${isOutOfStock ? '<i class="fas fa-times-circle"></i> Out of Stock' : '<i class="fas fa-check-circle"></i> In Stock'}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="qty-control">
+                                    <button class="qty-btn" onclick="window.updateQty('${item.id}', -1)"><i class="fas fa-minus"></i></button>
+                                    <span class="qty-num" id="qty-${item.id}">${quantities[item.id]}</span>
+                                    <button class="qty-btn" onclick="window.updateQty('${item.id}', 1)"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        if (isOutOfStock) {
+                            html += `
+                                <div class="menu-item out-of-stock">
+                                    <div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT OF STOCK</div>
+                                    <div class="item-image-block" onclick="zoomImage('${itemId}', '${item.name.replace(/'/g, "\\'")}')">
+                                        ${imgHtml}
+                                    </div>
+                                    <div class="item-info">
+                                        <div class="item-name">${item.name}</div>
+                                        <div class="item-price">₹${item.price}</div>
+                                    </div>
+                                    <div class="qty-control" style="opacity: 0.3; pointer-events: none;">
+                                        <button class="qty-btn"><i class="fas fa-minus"></i></button>
+                                        <span class="qty-num">0</span>
+                                        <button class="qty-btn"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `
+                                <div class="menu-item">
+                                    <div class="item-image-block" onclick="zoomImage('${itemId}', '${item.name.replace(/'/g, "\\'")}')">
+                                        ${imgHtml}
+                                    </div>
+                                    <div class="item-info">
+                                        <div class="item-name">${item.name}</div>
+                                        <div class="item-price">₹${item.price}</div>
+                                    </div>
+                                    <div class="qty-control">
+                                        <button class="qty-btn" onclick="window.updateQty('${item.id}', -1)"><i class="fas fa-minus"></i></button>
+                                        <span class="qty-num" id="qty-${item.id}">${quantities[item.id]}</span>
+                                        <button class="qty-btn" onclick="window.updateQty('${item.id}', 1)"><i class="fas fa-plus"></i></button>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                });
+                html += `</div>`;
+            });
+            if (menuContainer) menuContainer.innerHTML = html;
+            updateTotals();
+        }
+
+        // Initialize
+        renderCategoryTabs();
+        renderAdminHeader();
+        renderMenu();
+        
+        // Load images from cloud on startup
+        setTimeout(() => {
+            loadSavedImages();
+        }, 500);
+
+        // Close zoom modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeZoomModal();
+            }
+        });
+
+        // Auto-save to cloud when images change
+        window.addEventListener('beforeunload', function() {
+            if (USE_CLOUD) {
+                saveImagesToCloud();
+            }
         });
     </script>
 </body>
