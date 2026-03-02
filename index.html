@@ -9,6 +9,10 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
         /* Complete CSS from previous version - keeping it exactly the same */
         * {
@@ -1187,7 +1191,7 @@
             <div class="admin-area" id="adminArea"></div>
         </div>
 
-        <!-- Outlet Status Bar (Always Visible) -->
+        <!-- Outlet Status Bar (Always Visible) - Updated by Firebase -->
         <div class="outlet-status" id="outletStatusBar">
             <div class="status-badge">
                 <span class="status-dot open" id="statusDot"></span>
@@ -1237,7 +1241,7 @@
             
             <div style="background: #f5f5f5; padding: 12px 18px; border-radius: 40px; margin: 10px 0;">
                 <i class="fas fa-phone" style="color: #fc8019;"></i>
-                <span id="modalPhone">+91 9540828708</span>
+                <span id="modalPhone">+91 99905 77363</span>
             </div>
             
             <input type="text" class="modal-input" id="customerName" placeholder="Enter your name *" required>
@@ -1277,17 +1281,37 @@
     </div>
 
     <script>
-        // ========== CONFIGURATION - YOUR JSONBIN.IO DETAILS ==========
+        // ========== FIREBASE CONFIG ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbE5918xTe4mToiXInmBdtHpRFMfcHgEY",
+            authDomain: "the-dj-menu.firebaseapp.com",
+            projectId: "the-dj-menu",
+            storageBucket: "the-dj-menu.firebasestorage.app",
+            messagingSenderId: "1059142403893",
+            appId: "1:1059142403893:web:9bf0d05408233e492b2e7c"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ========== JSONBIN.IO CONFIG ==========
         const JSONBIN_API_KEY = "$2a$10$FZ4fy.fN71Cx6tT/zCswOOJdebJq50OaG14QuRkquiOy9r08I/1Oi";
         const JSONBIN_BIN_ID = "69a41221ae596e708f54bd64";
-        const USE_CLOUD = true; // Ab cloud enable hai!
+        const USE_JSONBIN = true;
 
         // ImgBB API Key
         const IMGBB_KEY = "33a4ac4bf9160466bd7103e1b516fc23";
 
-        // ========== FIXED WHATSAPP NUMBER ==========
-        let whatsappNumber = "919540828708";  // Sirf numbers, no + or spaces
-        let whatsappDisplay = "+91 9540828708";  // Display format
+        // ========== WHATSAPP NUMBER ==========
+        let whatsappNumber = "919990577363";
+        let whatsappDisplay = "+91 99905 77363";
+
+        // ========== OUTLET STATUS ==========
+        let outletOpen = true;
+
+        // ========== OUT OF STOCK ITEMS ==========
+        let outOfStockItems = [];
 
         // ---------- BASE MENU ----------
         const BASE_ITEMS = [
@@ -1318,44 +1342,90 @@
         let quantities = {};
         let itemImages = {};
         let adminActive = false;
-        
-        // New States
-        let outletOpen = true;
-        let outOfStockItems = JSON.parse(localStorage.getItem('dj_bites_out_of_stock')) || [];
-        
-        // Order tracking
         let orders = JSON.parse(localStorage.getItem('dj_bites_orders')) || [];
 
-        // ========== CLOUD FUNCTIONS ==========
+        // ========== FIREBASE REAL-TIME LISTENERS ==========
         
-        // Load images from JSONBin.io
-        async function loadImagesFromCloud() {
-            try {
-                showNotification('📥 Loading images from cloud...');
+        // 1. WhatsApp number
+        db.collection('settings').doc('whatsapp').onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                whatsappNumber = data.number || whatsappNumber;
+                whatsappDisplay = data.display || whatsappDisplay;
                 
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_API_KEY
-                    }
+                const modalPhone = document.getElementById('modalPhone');
+                if (modalPhone) modalPhone.textContent = whatsappDisplay;
+                
+                localStorage.setItem('dj_bites_whatsapp', JSON.stringify({ 
+                    number: whatsappNumber, 
+                    display: whatsappDisplay 
+                }));
+                
+                console.log('✅ WhatsApp updated:', whatsappDisplay);
+            }
+        });
+
+        // 2. Outlet status
+        db.collection('settings').doc('outlet').onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                outletOpen = data.status === 'open';
+                
+                updateOutletUI();
+                localStorage.setItem('dj_bites_outlet', outletOpen.toString());
+                
+                console.log('✅ Outlet updated:', outletOpen ? 'OPEN' : 'CLOSED');
+            }
+        });
+
+        // 3. OUT OF STOCK ITEMS - DEBUG VERSION
+        console.log('🔍 Setting up outOfStock listener...');
+        db.collection('settings').doc('outOfStock').onSnapshot((doc) => {
+            console.log('🔍 outOfStock snapshot received!');
+            if (doc.exists) {
+                const data = doc.data();
+                console.log('✅ outOfStock data from Firebase:', data);
+                outOfStockItems = data.items || [];
+                
+                // Save to localStorage
+                localStorage.setItem('dj_bites_out_of_stock', JSON.stringify(outOfStockItems));
+                
+                // Re-render menu
+                renderMenu();
+                
+                console.log('✅ Out of stock updated:', outOfStockItems);
+                showNotification('📦 Stock status updated!');
+            } else {
+                console.log('⚠️ outOfStock document does not exist yet');
+                // Document doesn't exist, create default
+                db.collection('settings').doc('outOfStock').set({
+                    items: [],
+                    updatedAt: new Date()
+                }).then(() => {
+                    console.log('✅ Created default outOfStock document');
+                }).catch((error) => {
+                    console.error('❌ Error creating outOfStock:', error);
                 });
-                
+            }
+        }, (error) => {
+            console.error('❌ outOfStock listener error:', error);
+        });
+
+        // ========== JSONBIN.IO FUNCTIONS ==========
+        
+        async function loadImagesFromJSONBin() {
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
+                });
                 const data = await response.json();
-                
                 if (data.record && data.record.images) {
                     itemImages = data.record.images;
                     localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
-                    console.log('✅ Loaded images from cloud:', Object.keys(itemImages).length);
-                    
-                    // Update menu if already rendered
-                    if (typeof renderMenu === 'function') {
-                        renderMenu();
-                    }
-                    
-                    showNotification('✅ Images loaded from cloud!');
+                    renderMenu();
                 }
             } catch (error) {
-                console.error('Error loading from cloud:', error);
-                // Fallback to localStorage
+                console.error('Error loading from JSONBin:', error);
                 const storedImages = localStorage.getItem('dj_bites_images');
                 if (storedImages) {
                     try {
@@ -1367,26 +1437,17 @@
             }
         }
 
-        // Save images to JSONBin.io
-        async function saveImagesToCloud() {
-            if (!USE_CLOUD) return;
-            
+        async function saveImagesToJSONBin() {
+            if (!USE_JSONBIN) return;
             try {
-                // First get existing data
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: {
-                        'X-Master-Key': JSONBIN_API_KEY
-                    }
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY }
                 });
-                
                 const data = await response.json();
                 let existingData = data.record || {};
-                
-                // Update images
                 existingData.images = itemImages;
                 
-                // Save back to cloud
-                const putResponse = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1394,21 +1455,16 @@
                     },
                     body: JSON.stringify(existingData)
                 });
-                
-                if (putResponse.ok) {
-                    console.log('✅ Images saved to cloud');
-                }
             } catch (error) {
-                console.error('Error saving to cloud:', error);
+                console.error('Error saving to JSONBin:', error);
             }
         }
 
-        // ========== IMAGE UPLOAD FUNCTION ==========
+        // ========== IMAGE UPLOAD ==========
         window.uploadImage = async function(input, itemId) {
             const file = input.files[0];
             if (!file) return;
 
-            // Show uploading notification
             showUploadProgress(true);
             showNotification('📤 Uploading to ImgBB...');
 
@@ -1416,7 +1472,6 @@
             formData.append("image", file);
 
             try {
-                // Upload to ImgBB
                 const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
                     method: 'POST',
                     body: formData
@@ -1426,66 +1481,46 @@
                 
                 if (data.success) {
                     const imageUrl = data.data.url;
-                    
-                    // Save in memory
                     itemImages[itemId] = imageUrl;
-                    
-                    // Save to localStorage
                     localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
                     
-                    // Save to cloud (JSONBin.io) - sabhi phones ke liye
-                    await saveImagesToCloud();
+                    await saveImagesToJSONBin();
                     
-                    // Update UI instantly
                     const imgElement = document.getElementById("img_" + itemId);
                     if (imgElement) {
                         if (imgElement.tagName === 'IMG') {
                             imgElement.src = imageUrl;
                         } else {
-                            // If it's a placeholder div, replace with img
                             const parentDiv = imgElement.parentElement;
                             const newImg = document.createElement('img');
                             newImg.className = 'item-image';
                             newImg.id = 'img_' + itemId;
                             newImg.src = imageUrl;
-                            newImg.alt = 'Food item';
                             parentDiv.innerHTML = '';
                             parentDiv.appendChild(newImg);
                         }
                     }
                     
                     showUploadProgress(false);
-                    showNotification("✅ Image uploaded to cloud successfully!");
-                } else {
-                    throw new Error('Upload failed');
+                    showNotification("✅ Image uploaded!");
                 }
             } catch (err) {
                 showUploadProgress(false);
                 showNotification("❌ Upload failed");
-                console.log(err);
             }
-            
-            // Clear input
             input.value = '';
         };
 
-        // ========== ZOOM IMAGE FUNCTION ==========
+        // ========== ZOOM FUNCTION ==========
         window.zoomImage = function(itemId, itemName) {
             const imageUrl = itemImages[itemId];
             if (!imageUrl) {
-                showNotification('❌ No image available');
+                showNotification('❌ No image');
                 return;
             }
-            
-            const zoomModal = document.getElementById('zoomModal');
-            const zoomImage = document.getElementById('zoomImage');
-            const zoomItemName = document.getElementById('zoomItemName');
-            
-            zoomImage.src = imageUrl;
-            zoomItemName.textContent = itemName;
-            zoomModal.style.display = 'flex';
-            
-            // Prevent body scrolling
+            document.getElementById('zoomImage').src = imageUrl;
+            document.getElementById('zoomItemName').textContent = itemName;
+            document.getElementById('zoomModal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
         };
 
@@ -1494,23 +1529,10 @@
             document.body.style.overflow = 'auto';
         };
 
-        // Load saved images on page load
+        // Load saved images
         window.loadSavedImages = async function() {
-            if (USE_CLOUD) {
-                await loadImagesFromCloud();
-            }
+            await loadImagesFromJSONBin();
             
-            // Also check localStorage for any images not in cloud yet
-            const storedImages = localStorage.getItem('dj_bites_images');
-            if (storedImages) {
-                try {
-                    const localImages = JSON.parse(storedImages) || {};
-                    // Merge with cloud images (cloud takes priority)
-                    itemImages = { ...localImages, ...itemImages };
-                } catch { }
-            }
-            
-            // Update all image elements
             document.querySelectorAll('[id^="img_"]').forEach(element => {
                 const itemId = element.id.replace("img_", "");
                 const saved = itemImages[itemId];
@@ -1519,13 +1541,11 @@
                     if (element.tagName === 'IMG') {
                         element.src = saved;
                     } else {
-                        // If it's a placeholder div, create new img
                         const parentDiv = element.parentElement;
                         const newImg = document.createElement('img');
                         newImg.className = 'item-image';
                         newImg.id = 'img_' + itemId;
                         newImg.src = saved;
-                        newImg.alt = 'Food item';
                         parentDiv.innerHTML = '';
                         parentDiv.appendChild(newImg);
                     }
@@ -1533,8 +1553,81 @@
             });
         };
 
+        // ========== ADMIN FUNCTIONS ==========
+        
+        // WhatsApp update
+        window.updateWhatsAppNumber = async function() {
+            const newNumber = document.getElementById('waNumberInput')?.value.trim();
+            const newDisplay = document.getElementById('waDisplayInput')?.value.trim();
+            
+            if (newNumber) {
+                const cleanNumber = newNumber.replace(/[^0-9]/g, '');
+                if (cleanNumber.length >= 10) {
+                    await db.collection('settings').doc('whatsapp').set({
+                        number: cleanNumber,
+                        display: newDisplay || cleanNumber,
+                        updatedAt: new Date()
+                    });
+                    showNotification('✅ WhatsApp updated for all!');
+                }
+            }
+        };
+
+        // Outlet toggle
+        window.toggleOutlet = async function() {
+            const newStatus = outletOpen ? 'closed' : 'open';
+            await db.collection('settings').doc('outlet').set({
+                status: newStatus,
+                updatedAt: new Date()
+            });
+        };
+
+        // OUT OF STOCK TOGGLE - FIXED VERSION
+        window.toggleStock = async function(itemId) {
+            console.log('🔍 Toggle stock for:', itemId);
+            console.log('🔍 Current outOfStockItems:', outOfStockItems);
+            
+            let newOutOfStock = [...outOfStockItems];
+            
+            if (newOutOfStock.includes(itemId)) {
+                newOutOfStock = newOutOfStock.filter(id => id !== itemId);
+                console.log('🔍 Removing from out of stock');
+            } else {
+                newOutOfStock.push(itemId);
+                console.log('🔍 Adding to out of stock');
+            }
+            
+            console.log('🔍 New outOfStockItems:', newOutOfStock);
+            
+            try {
+                // Firebase me save karo
+                await db.collection('settings').doc('outOfStock').set({
+                    items: newOutOfStock,
+                    updatedAt: new Date()
+                });
+                console.log('✅ Successfully saved to Firebase');
+                showNotification('✅ Stock updated for all users!');
+            } catch (error) {
+                console.error('❌ Error saving to Firebase:', error);
+                showNotification('❌ Error updating stock');
+            }
+            
+            playSound('toggle');
+        };
+
         // Load data from localStorage
         function loadStored() {
+            // Load from localStorage first as backup
+            const storedOutOfStock = localStorage.getItem('dj_bites_out_of_stock');
+            if (storedOutOfStock) {
+                try {
+                    outOfStockItems = JSON.parse(storedOutOfStock) || [];
+                    console.log('📦 Loaded outOfStock from localStorage:', outOfStockItems);
+                } catch { 
+                    outOfStockItems = []; 
+                }
+            }
+
             const storedPrices = localStorage.getItem('dj_bites_prices');
             if (storedPrices) {
                 try {
@@ -1550,7 +1643,6 @@
                 menuItems = BASE_ITEMS.map(item => ({ ...item, price: item.basePrice }));
             }
 
-            // Load custom items
             const storedItems = localStorage.getItem('dj_bites_custom_items');
             if (storedItems) {
                 try {
@@ -1563,7 +1655,6 @@
                 } catch { }
             }
 
-            // Load images from localStorage (temporary)
             const storedImages = localStorage.getItem('dj_bites_images');
             if (storedImages) {
                 try { 
@@ -1587,7 +1678,6 @@
                 outletOpen = storedOutlet === 'true';
             }
 
-            // Load custom names
             const storedNames = localStorage.getItem('dj_bites_names');
             if (storedNames) {
                 try {
@@ -1603,7 +1693,7 @@
         }
         loadStored();
 
-        // Save all settings
+        // Save menu settings
         function saveAllSettings() {
             const priceMap = {};
             const nameMap = {};
@@ -1614,21 +1704,13 @@
             localStorage.setItem('dj_bites_prices', JSON.stringify(priceMap));
             localStorage.setItem('dj_bites_names', JSON.stringify(nameMap));
             localStorage.setItem('dj_bites_images', JSON.stringify(itemImages));
-            localStorage.setItem('dj_bites_whatsapp', JSON.stringify({ number: whatsappNumber, display: whatsappDisplay }));
-            localStorage.setItem('dj_bites_out_of_stock', JSON.stringify(outOfStockItems));
-            localStorage.setItem('dj_bites_outlet', outletOpen.toString());
             
-            // Save custom items separately
             const customItems = menuItems.filter(item => 
                 !BASE_ITEMS.find(baseItem => baseItem.id === item.id)
             );
             localStorage.setItem('dj_bites_custom_items', JSON.stringify(customItems));
             
-            // Also save images to cloud
-            if (USE_CLOUD) {
-                saveImagesToCloud();
-            }
-            
+            if (USE_JSONBIN) saveImagesToJSONBin();
             showNotification('✅ Settings saved!');
             playSound('success');
         }
@@ -1769,22 +1851,18 @@
             } catch (e) { /* Silent fallback */ }
         }
 
-        // Show/hide upload progress
         function showUploadProgress(show) {
             const progress = document.getElementById('uploadProgress');
-            if (progress) {
-                progress.style.display = show ? 'flex' : 'none';
-            }
+            if (progress) progress.style.display = show ? 'flex' : 'none';
         }
 
-        // Show notification
         function showNotification(msg) {
             const notifDiv = document.getElementById('notificationArea');
             notifDiv.innerHTML = `<div class="notification">${msg}</div>`;
             setTimeout(() => { notifDiv.innerHTML = ''; }, 2500);
         }
 
-        // Clear today's orders - Now accessible globally
+        // Clear today's orders
         window.clearTodayOrders = function() {
             const pwd = prompt('Enter password to clear today\'s orders:');
             if (pwd === 'dj@123') {
@@ -1794,7 +1872,6 @@
                 showNotification('🗑️ Today\'s orders cleared!');
                 playSound('success');
                 
-                // Update admin panel if open
                 if (adminActive) {
                     renderAdminHeader();
                 }
@@ -1804,13 +1881,11 @@
             }
         };
 
-        // Get today's orders count
         function getTodayOrdersCount() {
             const today = new Date().toDateString();
             return orders.filter(order => new Date(order.timestamp).toDateString() === today).length;
         }
 
-        // Get today's total revenue
         function getTodayRevenue() {
             const today = new Date().toDateString();
             return orders
@@ -1818,45 +1893,11 @@
                 .reduce((sum, order) => sum + (order.total || 0), 0);
         }
 
-        // Toggle outlet status
-        window.toggleOutlet = function() {
-            outletOpen = !outletOpen;
-            
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const container = document.getElementById('djBitesApp');
-            const adminToggle = document.getElementById('adminOutletToggle');
-            const adminLabel = document.getElementById('adminToggleLabel');
-            
-            if (outletOpen) {
-                statusDot.className = 'status-dot open';
-                statusText.textContent = 'Outlet Open';
-                container.classList.remove('outlet-closed');
-                if (adminToggle) {
-                    adminToggle.classList.add('active');
-                    adminLabel.textContent = 'Open';
-                }
-            } else {
-                statusDot.className = 'status-dot closed';
-                statusText.textContent = 'Outlet Closed';
-                container.classList.add('outlet-closed');
-                if (adminToggle) {
-                    adminToggle.classList.remove('active');
-                    adminLabel.textContent = 'Closed';
-                }
-            }
-            
-            document.getElementById('orderBtn').disabled = !outletOpen;
-            localStorage.setItem('dj_bites_outlet', outletOpen.toString());
-            playSound('toggle');
-            showNotification(outletOpen ? '🟢 Outlet is now OPEN' : '🔴 Outlet is now CLOSED');
-        };
-
         // Add new item
         window.addNewItem = function() {
-            const name = document.getElementById('newItemName').value.trim();
-            const price = parseInt(document.getElementById('newItemPrice').value);
-            const category = document.getElementById('newItemCategory').value.trim();
+            const name = document.getElementById('newItemName')?.value.trim();
+            const price = parseInt(document.getElementById('newItemPrice')?.value);
+            const category = document.getElementById('newItemCategory')?.value.trim();
             
             if (!name || !price || !category) {
                 alert('Please fill all fields');
@@ -1889,17 +1930,6 @@
             playSound('success');
         };
 
-        // Toggle item stock
-        window.toggleStock = function(itemId) {
-            if (outOfStockItems.includes(itemId)) {
-                outOfStockItems = outOfStockItems.filter(id => id !== itemId);
-            } else {
-                outOfStockItems.push(itemId);
-            }
-            renderMenu();
-            playSound('toggle');
-        };
-
         // Update item name
         window.updateItemName = function(itemId, newName) {
             const item = menuItems.find(i => i.id === itemId);
@@ -1923,7 +1953,7 @@
         // Quantity update
         window.updateQty = function(id, delta) {
             if (!outletOpen) {
-                alert('❌ Outlet is closed. Please visit during opening hours.');
+                alert('❌ Outlet is closed.');
                 playSound('error');
                 return;
             }
@@ -1934,40 +1964,31 @@
                 return;
             }
             
-            const newVal = quantities[id] + delta;
+            const newVal = (quantities[id] || 0) + delta;
             if (newVal >= 0) {
                 quantities[id] = newVal;
                 const qtySpan = document.getElementById(`qty-${id}`);
                 if (qtySpan) qtySpan.innerText = newVal;
                 updateTotals();
                 
-                if (delta > 0) {
-                    playSound('add');
-                } else {
-                    playSound('remove');
-                }
+                playSound(delta > 0 ? 'add' : 'remove');
             }
         };
 
-        // Update totals
         function updateTotals() {
             let totalItems = 0, totalPrice = 0;
             menuItems.forEach(item => {
                 if (!outOfStockItems.includes(item.id)) {
-                    const q = quantities[item.id];
+                    const q = quantities[item.id] || 0;
                     totalItems += q;
                     totalPrice += q * item.price;
                 }
             });
-            const totalItemsSpan = document.getElementById('totalItems');
-            const totalPriceSpan = document.getElementById('totalPrice');
-            const totalPaySpan = document.getElementById('totalPay');
-            if (totalItemsSpan) totalItemsSpan.innerText = totalItems;
-            if (totalPriceSpan) totalPriceSpan.innerText = `₹${totalPrice}`;
-            if (totalPaySpan) totalPaySpan.innerText = `₹${totalPrice}`;
+            document.getElementById('totalItems').innerText = totalItems;
+            document.getElementById('totalPrice').innerText = `₹${totalPrice}`;
+            document.getElementById('totalPay').innerText = `₹${totalPrice}`;
         }
 
-        // Generate order ID
         function generateOrderId() {
             const now = new Date();
             const date = now.getDate().toString().padStart(2, '0');
@@ -1977,7 +1998,6 @@
             return `${date}${month}${year}-${random}`;
         }
 
-        // Get order count for phone
         function getOrderCountForPhone(phone) {
             const today = new Date().toDateString();
             return orders.filter(order => 
@@ -1986,7 +2006,6 @@
             ).length;
         }
 
-        // Save order
         function saveOrder(customerName, phone, items, total) {
             const orderId = generateOrderId();
             const order = {
@@ -2003,15 +2022,12 @@
             return orderId;
         }
 
-        // Get order preview
         function getOrderPreviewHTML() {
-            let html = '';
-            let total = 0;
-            let hasItems = false;
+            let html = '', total = 0, hasItems = false;
             
             menuItems.forEach(item => {
                 if (outOfStockItems.includes(item.id)) return;
-                const qty = quantities[item.id];
+                const qty = quantities[item.id] || 0;
                 if (qty > 0) {
                     hasItems = true;
                     const itemTotal = qty * item.price;
@@ -2034,7 +2050,6 @@
             return html;
         }
 
-        // Show order history
         window.showOrderHistory = function() {
             const today = new Date().toDateString();
             const todayOrders = orders.filter(order => new Date(order.timestamp).toDateString() === today);
@@ -2069,10 +2084,9 @@
             document.getElementById('historyModal').style.display = 'none';
         };
 
-        // Modal functions
         window.openCustomerModal = function() {
             if (!outletOpen) {
-                alert('❌ Outlet is currently closed. Please visit during opening hours.');
+                alert('❌ Outlet is currently closed.');
                 playSound('error');
                 return;
             }
@@ -2089,9 +2103,7 @@
             document.getElementById('customerName').value = '';
         };
 
-        // ========== FIXED ORDER SUBMISSION WITH DEBUG ==========
         window.submitCustomerInfo = function() {
-            console.log('submitCustomerInfo called'); // Debug
             const name = document.getElementById('customerName').value.trim();
             if (!name) {
                 alert('Please enter your name');
@@ -2103,17 +2115,12 @@
             placeOrder(name);
         };
 
-        // Place order - FIXED WhatsApp URL with debug
         function placeOrder(customerName) {
-            console.log('placeOrder called for:', customerName); // Debug
-            
-            let orderLines = [];
-            let orderItems = [];
-            let totalPrice = 0;
+            let orderLines = [], orderItems = [], totalPrice = 0;
             
             menuItems.forEach(item => {
                 if (outOfStockItems.includes(item.id)) return;
-                const qty = quantities[item.id];
+                const qty = quantities[item.id] || 0;
                 if (qty > 0) {
                     const itemTotal = qty * item.price;
                     totalPrice += itemTotal;
@@ -2144,44 +2151,16 @@
 
             playSound('order');
             
-            // FIXED: Try multiple WhatsApp URL formats
             const encodedMessage = encodeURIComponent(message);
+            const url = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
             
-            // Format 1: wa.me (recommended)
-            const url1 = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-            
-            // Format 2: api.whatsapp.com (alternative)
-            const url2 = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
-            
-            // Format 3: web.whatsapp.com (for desktop)
-            const url3 = `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMessage}`;
-            
-            console.log('WhatsApp Number:', whatsappNumber);
-            console.log('URL 1:', url1);
-            console.log('URL 2:', url2);
-            
-            // Try first format, if it fails in console we'll know
-            try {
-                // Use format 2 as it's more reliable
-                window.open(url2, '_blank');
-                console.log('Opening URL:', url2);
-            } catch (e) {
-                console.error('Error opening WhatsApp:', e);
-                alert('WhatsApp open karne me problem. URL copy karo: ' + url1);
-            }
+            window.open(url, '_blank');
             
             // Clear quantities
             menuItems.forEach(item => quantities[item.id] = 0);
             renderMenu();
             showNotification(`🎉 Order #${orderId} placed!`);
         }
-
-        // Also add direct test function
-        window.testWhatsApp = function() {
-            const testUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=Test%20message%20from%20DJ%20Bites`;
-            console.log('Test URL:', testUrl);
-            window.open(testUrl, '_blank');
-        };
 
         // DOM elements
         const menuContainer = document.getElementById('menuContainer');
@@ -2190,21 +2169,38 @@
         const orderBtn = document.getElementById('orderBtn');
         const categoryTabs = document.getElementById('categoryTabs');
 
-        // Add click handler directly to button
+        // Update outlet UI
+        function updateOutletUI() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const container = document.getElementById('djBitesApp');
+            
+            if (outletOpen) {
+                statusDot.className = 'status-dot open';
+                statusText.textContent = 'Outlet Open';
+                container?.classList.remove('outlet-closed');
+            } else {
+                statusDot.className = 'status-dot closed';
+                statusText.textContent = 'Outlet Closed';
+                container?.classList.add('outlet-closed');
+            }
+            if (orderBtn) orderBtn.disabled = !outletOpen;
+        }
+
+        // Order button click handler
         if (orderBtn) {
             orderBtn.addEventListener('click', function(e) {
-                console.log('Order button clicked directly'); // Debug
                 e.preventDefault();
                 
                 if (!outletOpen) {
-                    alert('❌ Outlet is currently closed. Please visit during opening hours.');
+                    alert('❌ Outlet is currently closed.');
                     playSound('error');
                     return;
                 }
                 
                 let hasItems = false;
                 menuItems.forEach(item => {
-                    if (!outOfStockItems.includes(item.id) && quantities[item.id] > 0) hasItems = true;
+                    if (!outOfStockItems.includes(item.id) && (quantities[item.id] || 0) > 0) hasItems = true;
                 });
                 
                 if (!hasItems) {
@@ -2217,26 +2213,7 @@
             });
         }
 
-        // Set initial UI
-        function updateOutletUI() {
-            const statusDot = document.getElementById('statusDot');
-            const statusText = document.getElementById('statusText');
-            const container = document.getElementById('djBitesApp');
-            
-            if (outletOpen) {
-                statusDot.className = 'status-dot open';
-                statusText.textContent = 'Outlet Open';
-                container.classList.remove('outlet-closed');
-            } else {
-                statusDot.className = 'status-dot closed';
-                statusText.textContent = 'Outlet Closed';
-                container.classList.add('outlet-closed');
-            }
-            if (orderBtn) orderBtn.disabled = !outletOpen;
-        }
-        updateOutletUI();
-
-        // Get unique categories
+        // Get categories
         const categories = [...new Set(menuItems.map(item => item.category))];
 
         function getCategoryIcon(category) {
@@ -2248,7 +2225,6 @@
             return 'fa-utensils';
         }
 
-        // Render category tabs
         function renderCategoryTabs() {
             let tabsHtml = '';
             categories.forEach((cat, index) => {
@@ -2259,7 +2235,6 @@
             if (categoryTabs) categoryTabs.innerHTML = tabsHtml;
         }
 
-        // Scroll to category
         window.scrollToCategory = function(category, element) {
             document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
             element.classList.add('active');
@@ -2271,7 +2246,6 @@
             playSound('click');
         };
 
-        // Admin header - Now includes Order Management
         function renderAdminHeader() {
             if (adminActive) {
                 adminArea.innerHTML = `
@@ -2288,18 +2262,14 @@
 
                 adminSettingsPanel.style.display = 'block';
                 
-                // Get today's stats
                 const todayOrdersCount = getTodayOrdersCount();
                 const todayRevenue = getTodayRevenue();
                 
                 adminSettingsPanel.innerHTML = `
                     <div class="admin-settings-panel">
-                        <!-- Order Management Section - Inside Admin Panel -->
                         <div class="admin-order-section">
                             <div class="admin-order-header">
-                                <div class="admin-order-title">
-                                    <i class="fas fa-shopping-cart"></i> Today's Orders
-                                </div>
+                                <div class="admin-order-title"><i class="fas fa-shopping-cart"></i> Today's Orders</div>
                                 <div class="admin-order-stats">
                                     <div class="admin-stat-box">
                                         <div class="admin-stat-number">${todayOrdersCount}</div>
@@ -2313,27 +2283,22 @@
                             </div>
                             
                             <button class="admin-view-orders-btn" onclick="showOrderHistory()">
-                                <i class="fas fa-eye"></i> View All Orders
+                                <i class="fas fa-eye"></i> View Orders
                             </button>
                             
                             <button class="admin-clear-btn" onclick="clearTodayOrders()">
-                                <i class="fas fa-trash"></i> Clear Today's Orders
+                                <i class="fas fa-trash"></i> Clear Today
                             </button>
                         </div>
 
-                        <!-- Add New Item Section -->
                         <div class="add-item-section">
-                            <div class="add-item-title">
-                                <i class="fas fa-plus-circle"></i> Add New Item
-                            </div>
-                            <input type="text" class="add-item-input" id="newItemName" placeholder="Item Name (e.g., Paneer Tikka)">
+                            <div class="add-item-title"><i class="fas fa-plus-circle"></i> Add New Item</div>
+                            <input type="text" class="add-item-input" id="newItemName" placeholder="Item Name">
                             <div class="add-item-row">
-                                <input type="number" class="add-item-input" id="newItemPrice" placeholder="Price (₹)" style="width: 40%;">
-                                <input type="text" class="add-item-input" id="newItemCategory" placeholder="Category (e.g., 🍔 Burgers)" style="width: 60%;">
+                                <input type="number" class="add-item-input" id="newItemPrice" placeholder="Price" style="width:40%;">
+                                <input type="text" class="add-item-input" id="newItemCategory" placeholder="Category" style="width:60%;">
                             </div>
-                            <button class="add-item-btn" onclick="addNewItem()">
-                                <i class="fas fa-plus"></i> Add to Menu
-                            </button>
+                            <button class="add-item-btn" onclick="addNewItem()"><i class="fas fa-plus"></i> Add</button>
                         </div>
 
                         <div class="admin-toggle-row">
@@ -2345,32 +2310,34 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="margin: 15px 0;">
-                            <label style="font-weight: 600;"><i class="fab fa-whatsapp"></i> WhatsApp Number:</label>
+                        
+                        <div style="margin:15px 0;padding:10px;background:#e8f5e8;border-radius:30px;">
+                            <label style="font-weight:600;color:#075e54;"><i class="fab fa-whatsapp"></i> WhatsApp Number:</label>
                             <input type="text" class="admin-input" id="waNumberInput" value="${whatsappNumber}">
-                            <small style="color: #666; display: block; margin-top: 5px;">Format: 919540828708 (no + or spaces)</small>
+                            <input type="text" class="admin-input" id="waDisplayInput" value="${whatsappDisplay}" style="margin-top:5px;">
+                            <small style="color:#666;display:block;margin-top:5px;">Ye change sabke phone me real-time hoga!</small>
+                            <button class="save-btn" onclick="updateWhatsAppNumber()" style="margin-top:5px;"><i class="fas fa-save"></i> Update for All</button>
                         </div>
-                        <div style="margin: 15px 0;">
-                            <label style="font-weight: 600;"><i class="fas fa-globe"></i> Display Format:</label>
-                            <input type="text" class="admin-input" id="waDisplayInput" value="${whatsappDisplay}">
+                        
+                        <div style="margin:15px 0;padding:10px;background:#fff3e0;border-radius:30px;">
+                            <label style="font-weight:600;color:#fc8019;"><i class="fas fa-box"></i> Out of Stock Items</label>
+                            <p style="font-size:0.8rem;color:#666;margin:5px 0;">Items ki stock status sabke phone me real-time change hogi</p>
+                            <div style="max-height:150px;overflow-y:auto;margin-top:10px;">
+                                ${menuItems.map(item => `
+                                    <div style="display:flex;align-items:center;justify-content:space-between;padding:5px;border-bottom:1px solid #eee;">
+                                        <span>${item.name}</span>
+                                        <button class="stock-toggle-btn ${outOfStockItems.includes(item.id) ? 'out' : 'in'}" 
+                                                onclick="toggleStock('${item.id}')" style="padding:3px 10px;">
+                                            ${outOfStockItems.includes(item.id) ? 'Out' : 'In'} Stock
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                        <button class="save-btn" id="adminSaveBtn"><i class="fas fa-save"></i> Save Changes</button>
-                        <button class="save-btn" onclick="testWhatsApp()" style="margin-top: 10px; background: #25D366;"><i class="fab fa-whatsapp"></i> Test WhatsApp</button>
                     </div>
                 `;
-
-                document.getElementById('adminSaveBtn')?.addEventListener('click', function() {
-                    const newNumber = document.getElementById('waNumberInput')?.value.trim();
-                    const newDisplay = document.getElementById('waDisplayInput')?.value.trim();
-                    if (newNumber) whatsappNumber = newNumber.replace(/[^0-9]/g, ''); // Remove non-digits
-                    if (newDisplay) whatsappDisplay = newDisplay;
-                    saveAllSettings();
-                });
-
             } else {
-                adminArea.innerHTML = `
-                    <button class="admin-btn" id="adminLoginBtn"><i class="fas fa-lock"></i> Admin</button>
-                `;
+                adminArea.innerHTML = `<button class="admin-btn" id="adminLoginBtn"><i class="fas fa-lock"></i> Admin</button>`;
                 document.getElementById('adminLoginBtn')?.addEventListener('click', () => {
                     const pwd = prompt('Enter admin password:');
                     if (pwd === 'dj@123') {
@@ -2387,7 +2354,6 @@
             }
         }
 
-        // Render menu
         function renderMenu() {
             let html = '';
             categories.forEach(cat => {
@@ -2401,7 +2367,6 @@
                     const isOutOfStock = outOfStockItems.includes(itemId);
                     const imgSrc = itemImages[itemId] || '';
                     
-                    // Image HTML with proper ID and click handler for zoom
                     const imgHtml = imgSrc ? 
                         `<img class="item-image" id="img_${itemId}" src="${imgSrc}" alt="${item.name}" 
                               onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div class=\\'image-placeholder\\' id=\\'img_${itemId}\\'><i class=\\'fas fa-image\\'></i><span>photo</span></div>';">` : 
@@ -2410,7 +2375,7 @@
                     if (adminActive) {
                         html += `
                             <div class="menu-item ${isOutOfStock ? 'out-of-stock' : ''}">
-                                ${isOutOfStock ? '<div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT OF STOCK</div>' : ''}
+                                ${isOutOfStock ? '<div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT</div>' : ''}
                                 <div class="item-image-block" onclick="zoomImage('${itemId}', '${item.name.replace(/'/g, "\\'")}')">
                                     <div style="position: relative; width: 100%; height: 100%;">
                                         ${imgHtml}
@@ -2426,13 +2391,13 @@
                                     </div>
                                     <div class="stock-toggle">
                                         <button class="stock-toggle-btn ${isOutOfStock ? 'out' : 'in'}" onclick="toggleStock('${itemId}')">
-                                            ${isOutOfStock ? '<i class="fas fa-times-circle"></i> Out of Stock' : '<i class="fas fa-check-circle"></i> In Stock'}
+                                            ${isOutOfStock ? 'Out' : 'In'} Stock
                                         </button>
                                     </div>
                                 </div>
                                 <div class="qty-control">
                                     <button class="qty-btn" onclick="window.updateQty('${item.id}', -1)"><i class="fas fa-minus"></i></button>
-                                    <span class="qty-num" id="qty-${item.id}">${quantities[item.id]}</span>
+                                    <span class="qty-num" id="qty-${item.id}">${quantities[item.id] || 0}</span>
                                     <button class="qty-btn" onclick="window.updateQty('${item.id}', 1)"><i class="fas fa-plus"></i></button>
                                 </div>
                             </div>
@@ -2441,7 +2406,7 @@
                         if (isOutOfStock) {
                             html += `
                                 <div class="menu-item out-of-stock">
-                                    <div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT OF STOCK</div>
+                                    <div class="out-of-stock-badge"><i class="fas fa-times-circle"></i> OUT</div>
                                     <div class="item-image-block" onclick="zoomImage('${itemId}', '${item.name.replace(/'/g, "\\'")}')">
                                         ${imgHtml}
                                     </div>
@@ -2468,7 +2433,7 @@
                                     </div>
                                     <div class="qty-control">
                                         <button class="qty-btn" onclick="window.updateQty('${item.id}', -1)"><i class="fas fa-minus"></i></button>
-                                        <span class="qty-num" id="qty-${item.id}">${quantities[item.id]}</span>
+                                        <span class="qty-num" id="qty-${item.id}">${quantities[item.id] || 0}</span>
                                         <button class="qty-btn" onclick="window.updateQty('${item.id}', 1)"><i class="fas fa-plus"></i></button>
                                     </div>
                                 </div>
@@ -2486,23 +2451,17 @@
         renderCategoryTabs();
         renderAdminHeader();
         renderMenu();
+        updateOutletUI();
         
-        // Load images from cloud on startup
+        // Load images from JSONBin
         setTimeout(() => {
             loadSavedImages();
         }, 500);
 
-        // Close zoom modal with ESC key
+        // ESC for zoom
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeZoomModal();
-            }
-        });
-
-        // Auto-save to cloud when images change
-        window.addEventListener('beforeunload', function() {
-            if (USE_CLOUD) {
-                saveImagesToCloud();
             }
         });
     </script>
